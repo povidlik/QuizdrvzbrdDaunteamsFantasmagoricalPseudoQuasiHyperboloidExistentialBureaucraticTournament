@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Предпросмотр теста</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: system-ui, sans-serif;
+      color: #172033;
+      background: #f3f5f9;
+    }
+
+    body {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 20px;
+    }
+
+    h1 {
+      margin-top: 0;
+    }
+
+    .panel {
+      min-width: 0;
+      padding: 20px;
+      border: 1px solid #dce1ea;
+      border-radius: 12px;
+      background: #fff;
+    }
+
+    textarea {
+      box-sizing: border-box;
+      width: 100%;
+      min-height: 340px;
+      padding: 12px;
+      border: 1px solid #c8cfdb;
+      border-radius: 8px;
+      font: 14px/1.5 ui-monospace, monospace;
+      resize: vertical;
+    }
+
+    button {
+      margin: 12px 8px 0 0;
+      padding: 10px 14px;
+      border: 0;
+      border-radius: 7px;
+      color: white;
+      background: #3156c9;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: .55;
+    }
+
+    #status {
+      min-height: 1.5em;
+      color: #a32121;
+      white-space: pre-wrap;
+    }
+
+    #preview {
+      box-sizing: border-box;
+      width: 100%;
+      min-height: 340px;
+      border: 1px solid #c8cfdb;
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    #output {
+      min-height: 240px;
+      margin-top: 20px;
+    }
+
+  </style>
+</head>
+<body>
+  <h1>Предпросмотр теста</h1>
+
+  <section class="panel">
+    <iframe id="preview" title="Предпросмотр сгенерированного теста"></iframe>
+  </section>
+
+  <script>
+    "use strict";
+
+    const sample = `Title Демонстрационный тест
+H1 Основы веб-разработки
+Style default
+
+? Какой язык используется для разметки веб-страниц? r
+- JavaScript
++ HTML
+- CSS
+e
+
+? Какие из перечисленных значений являются типами ответа в этом DSL? c
++ Одиночный выбор
++ Множественный выбор
+- Случайный выбор
+e
+
+? Как называется таблица стилей веб-страницы? t
+_ CSS`;
+
+    const preview = document.querySelector("#preview");
+
+    function parseQuiz(source) {
+      const quiz = { title: "Тест", heading: "Тест", style: "default", questions: [] };
+      const lines = source.split(/\r?\n/);
+      let question = null;
+      let blockEnded = true;
+      const errors = [];
+
+      function finishQuestion(lineNumber) {
+        if (!question) return;
+        if (question.type === "t") {
+          if (!question.answer) {
+            errors.push(`Строка ${lineNumber}: для текстового вопроса нужен ответ в формате "_ ответ".`);
+          }
+        } else {
+          if (!blockEnded) {
+            errors.push(`Строка ${lineNumber}: блок вариантов вопроса "${question.text}" должен завершаться строкой e.`);
+          }
+          const correctCount = question.options.filter((option) => option.correct).length;
+          if (question.type === "r" && correctCount !== 1) {
+            errors.push(`Строка ${question.line}: у вопроса с типом r должен быть ровно один правильный вариант.`);
+          }
+          if (question.type === "c" && correctCount < 1) {
+            errors.push(`Строка ${question.line}: у вопроса с типом c должен быть хотя бы один правильный вариант.`);
+          }
+          if (question.options.length === 0) {
+            errors.push(`Строка ${question.line}: добавьте варианты ответа.`);
+          }
+        }
+        quiz.questions.push(question);
+        question = null;
+      }
+
+      lines.forEach((rawLine, index) => {
+        const lineNumber = index + 1;
+        const line = rawLine.trim();
+        if (!line) return;
+
+        const questionMatch = line.match(/^\?\s+(.+?)\s+([rct])$/i);
+        if (questionMatch) {
+          finishQuestion(lineNumber);
+          question = {
+            text: questionMatch[1].trim(),
+            type: questionMatch[2].toLowerCase(),
+            options: [],
+            answer: "",
+            line: lineNumber
+          };
+          blockEnded = question.type === "t";
+          return;
+        }
+
+        if (!question) {
+          const metadataMatch = line.match(/^(Title|H1|Style)\s+(.+)$/i);
+          if (!metadataMatch) {
+            errors.push(`Строка ${lineNumber}: ожидалась директива Title, H1, Style или начало вопроса "?".`);
+            return;
+          }
+          const value = metadataMatch[2].trim();
+          if (!value) {
+            errors.push(`Строка ${lineNumber}: значение директивы ${metadataMatch[1]} не должно быть пустым.`);
+            return;
+          }
+          const key = metadataMatch[1].toLowerCase();
+          if (key === "title") quiz.title = value;
+          if (key === "h1") quiz.heading = value;
+          if (key === "style") {
+            if (!/^[a-zA-Z0-9_-]+$/.test(value)) {
+              errors.push(`Строка ${lineNumber}: Style должен содержать только латинские буквы, цифры, "_" или "-".`);
+            } else {
+              quiz.style = value;
+            }
+          }
+          return;
+        }
+
+        if (question.type === "t") {
+          const answerMatch = line.match(/^_\s*(.+)$/);
+          if (!answerMatch) {
+            errors.push(`Строка ${lineNumber}: для текстового ответа используйте формат "_ ответ".`);
+          } else if (question.answer) {
+            errors.push(`Строка ${lineNumber}: для текстового вопроса укажите только один правильный ответ.`);
+          } else {
+            question.answer = answerMatch[1].trim();
+          }
+          return;
+        }
+
+        if (/^e$/i.test(line)) {
+          if (blockEnded) {
+            errors.push(`Строка ${lineNumber}: лишняя строка e — блок вариантов уже завершен.`);
+          }
+          blockEnded = true;
+          return;
+        }
+
+        const optionMatch = line.match(/^([+-])\s+(.+)$/);
+        if (optionMatch && !blockEnded) {
+          question.options.push({ text: optionMatch[2].trim(), correct: optionMatch[1] === "+" });
+          return;
+        }
+
+        errors.push(`Строка ${lineNumber}: ожидался вариант ответа ("- текст" или "+ текст")${blockEnded ? " до строки e" : ""}.`);
+      });
+
+      finishQuestion(lines.length + 1);
+      if (quiz.questions.length === 0) errors.push("Добавьте хотя бы один вопрос.");
+      return { quiz, errors };
+    }
+
+    function makeQuizHtml(quiz) {
+      const json = JSON.stringify(quiz).replace(/</g, "\\u003c");
+      return `<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title></title>
+  <style>
+    body{max-width:760px;margin:32px auto;padding:0 16px;font:16px/1.5 system-ui,sans-serif;color:#172033}
+    fieldset{margin:16px 0;padding:16px;border:1px solid #c8cfdb;border-radius:8px}
+    label{display:block;margin:8px 0}
+    input[type=text]{box-sizing:border-box;width:100%;max-width:420px;padding:9px}
+    button{padding:10px 16px;border:0;border-radius:6px;color:#fff;background:#3156c9;font:inherit;cursor:pointer}
+    #result{margin-top:16px;font-weight:700}
+    .quiz--compact fieldset{margin:8px 0;padding:10px}
+  </style>
+</head>
+<body>
+  <main id="quiz" class="quiz--${quiz.style}"></main>
+  <script type="application/json" id="quiz-data">${json}<\/script>
+  <script>
+    "use strict";
+    const quiz = JSON.parse(document.getElementById("quiz-data").textContent);
+    document.title = quiz.title;
+    const root = document.getElementById("quiz");
+    const heading = document.createElement("h1");
+    heading.textContent = quiz.heading;
+    root.appendChild(heading);
+    const form = document.createElement("form");
+    quiz.questions.forEach((question, questionIndex) => {
+      const group = document.createElement("fieldset");
+      const legend = document.createElement("legend");
+      legend.textContent = (questionIndex + 1) + ". " + question.text;
+      group.appendChild(legend);
+      if (question.type === "t") {
+        const input = document.createElement("input");
+        input.type = "text";
+        input.name = "question-" + questionIndex;
+        input.autocomplete = "off";
+        input.required = true;
+        input.setAttribute("aria-label", question.text);
+        group.appendChild(input);
+      } else {
+        question.options.forEach((option, optionIndex) => {
+          const label = document.createElement("label");
+          const input = document.createElement("input");
+          input.type = question.type === "r" ? "radio" : "checkbox";
+          input.name = "question-" + questionIndex;
+          input.value = String(optionIndex);
+          if (question.type === "r") input.required = true;
+          label.appendChild(input);
+          label.appendChild(document.createTextNode(" " + option.text));
+          group.appendChild(label);
+        });
+      }
+      form.appendChild(group);
+    });
+    const submit = document.createElement("button");
+    submit.type = "submit";
+    submit.textContent = "Проверить ответы";
+    form.appendChild(submit);
+    const result = document.createElement("p");
+    result.id = "result";
+    result.setAttribute("aria-live", "polite");
+    form.appendChild(result);
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      let score = 0;
+      quiz.questions.forEach((question, questionIndex) => {
+        if (question.type === "t") {
+          const input = form.elements.namedItem("question-" + questionIndex);
+          if (input.value.trim().toLocaleLowerCase() === question.answer.trim().toLocaleLowerCase()) score++;
+          return;
+        }
+        const selected = Array.from(form.querySelectorAll('[name="question-' + questionIndex + '"]:checked'))
+          .map((input) => Number(input.value))
+          .sort((a, b) => a - b);
+        const expected = question.options
+          .map((option, optionIndex) => option.correct ? optionIndex : -1)
+          .filter((optionIndex) => optionIndex !== -1);
+        if (selected.length === expected.length && selected.every((optionIndex, index) => optionIndex === expected[index])) score++;
+      });
+      result.textContent = "Результат: " + score + " из " + quiz.questions.length;
+    });
+    root.appendChild(form);
+  <\/script>
+</body>
+</html>`;
+    }
+
+    const { quiz, errors } = parseQuiz(sample);
+    if (errors.length) throw new Error(errors.join("\n"));
+    preview.srcdoc = makeQuizHtml(quiz);
+  </script>
+</body>
+</html>
