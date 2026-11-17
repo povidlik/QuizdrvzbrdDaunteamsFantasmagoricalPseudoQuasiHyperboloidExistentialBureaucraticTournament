@@ -1,8 +1,10 @@
 package com.quiz.parser;
 
+import com.quiz.model.Question;
 import com.quiz.model.Quiz;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -36,7 +38,8 @@ public final class DslParser {
             String value = directiveValue(text, TITLE);
             if (value != null) {
                 if (value.isEmpty()) {
-                    errors.add(new ParseError(line.number(), ErrorCode.EMPTY_DIRECTIVE_VALUE, "у директивы Title нет значения"));
+                    errors.add(new ParseError(line.number(), ErrorCode.EMPTY_DIRECTIVE_VALUE,
+                            "у директивы Title нет значения"));
                 } else {
                     title = value;
                 }
@@ -46,7 +49,8 @@ public final class DslParser {
             value = directiveValue(text, HEADING);
             if (value != null) {
                 if (value.isEmpty()) {
-                    errors.add(new ParseError(line.number(), ErrorCode.EMPTY_DIRECTIVE_VALUE, "у директивы H1 нет значения"));
+                    errors.add(new ParseError(line.number(), ErrorCode.EMPTY_DIRECTIVE_VALUE,
+                            "у директивы H1 нет значения"));
                 } else {
                     heading = value;
                 }
@@ -56,7 +60,8 @@ public final class DslParser {
             value = directiveValue(text, STYLE);
             if (value != null) {
                 if (value.isEmpty()) {
-                    errors.add(new ParseError(line.number(), ErrorCode.EMPTY_DIRECTIVE_VALUE, "у директивы Style нет значения"));
+                    errors.add(new ParseError(line.number(), ErrorCode.EMPTY_DIRECTIVE_VALUE,
+                            "у директивы Style нет значения"));
                 } else {
                     style = value;
                 }
@@ -67,7 +72,7 @@ public final class DslParser {
                     "не удалось разобрать строку: " + snippet(text)));
         }
 
-        Quiz quiz = new Quiz(title, heading, style, List.of());
+        Quiz quiz = new Quiz(title, heading, style, Collections.<Question>emptyList());
         return new ParseResult(quiz, errors);
     }
 
@@ -84,7 +89,7 @@ public final class DslParser {
         if (!rest.isEmpty() && !Character.isWhitespace(rest.charAt(0))) {
             return null;
         }
-        return rest.strip();
+        return rest.trim();
     }
 
     private static List<Line> splitLines(String source) {
@@ -100,7 +105,7 @@ public final class DslParser {
 
         String[] raw = text.split("\n", -1);
         for (int i = 0; i < raw.length; i++) {
-            lines.add(new Line(i + 1, raw[i].strip()));
+            lines.add(new Line(i + 1, raw[i].trim()));
         }
         return lines;
     }
@@ -109,6 +114,23 @@ public final class DslParser {
         return text.length() <= SNIPPET_LIMIT ? text : text.substring(0, SNIPPET_LIMIT) + "…";
     }
 
-    private record Line(int number, String text) {
+    /** Строка исходного текста с номером. */
+    private static final class Line {
+
+        private final int number;
+        private final String text;
+
+        private Line(int number, String text) {
+            this.number = number;
+            this.text = text;
+        }
+
+        int number() {
+            return number;
+        }
+
+        String text() {
+            return text;
+        }
     }
 }

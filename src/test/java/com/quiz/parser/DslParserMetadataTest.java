@@ -15,11 +15,10 @@ class DslParserMetadataTest {
     @Test
     @DisplayName("Разбирает Title, H1 и Style")
     void parsesMetadataDirectives() {
-        ParseResult result = parser.parse("""
-                Title My title
-                H1 Super Test
-                Style dark
-                """);
+        ParseResult result = parser.parse(
+                "Title My title\n"
+                        + "H1 Super Test\n"
+                        + "Style dark\n");
 
         assertTrue(result.isSuccess(), () -> result.errorReport());
         Quiz quiz = result.quiz();
@@ -52,11 +51,10 @@ class DslParserMetadataTest {
     @Test
     @DisplayName("Неизвестная строка попадает в ошибки с номером строки")
     void reportsUnknownDirectiveWithLineNumber() {
-        ParseResult result = parser.parse("""
-                Title My title
-
-                что-то непонятное
-                """);
+        ParseResult result = parser.parse(
+                "Title My title\n"
+                        + "\n"
+                        + "что-то непонятное\n");
 
         assertFalse(result.isSuccess());
         assertEquals(1, result.errors().size());
