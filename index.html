@@ -3,94 +3,619 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Предпросмотр теста</title>
+  <title>Тест</title>
   <style>
     :root {
-      color-scheme: light;
-      font-family: system-ui, sans-serif;
-      color: #172033;
-      background: #f3f5f9;
+      color-scheme: dark;
+      font-family: Georgia, "Times New Roman", serif;
+      color: #e7d9d4;
+      background: #090707;
     }
 
     body {
+      position: relative;
+      box-sizing: border-box;
+      min-height: 100vh;
       max-width: 1100px;
       margin: 0 auto;
-      padding: 32px 20px;
+      padding: 24px 20px;
+      isolation: isolate;
+      background:
+        radial-gradient(ellipse at 18% 22%, rgb(111 17 20 / 44%), transparent 31%),
+        radial-gradient(ellipse at 82% 68%, rgb(83 14 17 / 48%), transparent 35%),
+        radial-gradient(ellipse at 50% 48%, #211313 0, #100b0b 48%, #080707 100%);
     }
 
-    h1 {
-      margin-top: 0;
+    body::before {
+      position: fixed;
+      z-index: -1;
+      inset: 0;
+      background:
+        repeating-linear-gradient(117deg, transparent 0 31px, rgb(255 235 220 / 2%) 32px, transparent 34px 63px),
+        repeating-radial-gradient(ellipse at 25% 35%, transparent 0 18px, rgb(0 0 0 / 15%) 20px 22px, transparent 24px 39px),
+        radial-gradient(ellipse at 50% 50%, transparent 24%, rgb(0 0 0 / 70%) 100%);
+      content: "";
+      pointer-events: none;
+    }
+
+    body > * {
+      position: relative;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    h1,
+    h2,
+    h3 {
+      font-family: Impact, Haettenschweiler, "Arial Black", fantasy;
+      text-transform: uppercase;
     }
 
     .panel {
       min-width: 0;
+      min-height: calc(100vh - 48px);
       padding: 20px;
-      border: 1px solid #dce1ea;
-      border-radius: 12px;
-      background: #fff;
-    }
-
-    textarea {
-      box-sizing: border-box;
-      width: 100%;
-      min-height: 340px;
-      padding: 12px;
-      border: 1px solid #c8cfdb;
-      border-radius: 8px;
-      font: 14px/1.5 ui-monospace, monospace;
-      resize: vertical;
+      border: 1px solid #542326;
+      background: linear-gradient(145deg, rgb(25 16 16 / 96%), rgb(9 8 8 / 98%));
+      box-shadow: 0 18px 70px rgb(0 0 0 / 55%), inset 0 0 36px rgb(93 11 19 / 12%);
     }
 
     button {
-      margin: 12px 8px 0 0;
+      margin: 0;
       padding: 10px 14px;
-      border: 0;
-      border-radius: 7px;
-      color: white;
-      background: #3156c9;
-      font: inherit;
+      border: 1px solid #8e3035;
+      color: #f2e7df;
+      background: linear-gradient(180deg, #58191e, #260e11);
+      font: 600 15px Georgia, "Times New Roman", serif;
+      letter-spacing: .08em;
+      text-transform: uppercase;
       cursor: pointer;
+      box-shadow: 0 4px 15px rgb(0 0 0 / 40%), inset 0 1px rgb(255 255 255 / 9%);
+      transition: background-color .18s ease, border-color .18s ease, transform .18s ease;
     }
 
-    button:disabled {
-      cursor: not-allowed;
-      opacity: .55;
+    button:hover {
+      transform: translateY(-2px);
+      border-color: #d65b60;
+      background: linear-gradient(180deg, #81242a, #3c1015);
     }
 
-    #status {
-      min-height: 1.5em;
-      color: #a32121;
-      white-space: pre-wrap;
+    .menu {
+      display: flex;
+      min-height: calc(100vh - 48px);
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      text-align: center;
+    }
+
+    .menu-kicker,
+    .menu-tagline {
+      margin: 0;
+      color: #b6a19a;
+      font: 11px/1.5 Georgia, "Times New Roman", serif;
+      letter-spacing: .55em;
+      text-transform: uppercase;
+    }
+
+    .menu-kicker {
+      margin-top: 18px;
+    }
+
+    .menu-tagline {
+      margin-bottom: 20px;
+    }
+
+    .menu h1 {
+      position: relative;
+      width: 100%;
+      margin: auto 0 20px;
+      color: #e5d8d2;
+      font-family: Impact, Haettenschweiler, "Arial Black", fantasy;
+      font-size: clamp(2.2rem, 8vw, 6.5rem);
+      font-weight: 900;
+      letter-spacing: -.09em;
+      line-height: .83;
+      overflow-wrap: anywhere;
+      text-align: center;
+      text-shadow: -2px -1px #827674, 0 5px #4e0c11, 0 0 22px #a31b22;
+      text-transform: uppercase;
+      -webkit-text-stroke: 1px #e9dcd5;
+      filter: contrast(1.3);
+      transform: skewX(-4deg) scaleX(.91);
+    }
+
+    .menu h1::after {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      color: transparent;
+      content: attr(data-title);
+      clip-path: polygon(0 16%, 7% 22%, 11% 3%, 16% 20%, 22% 11%, 27% 26%, 34% 8%, 39% 20%, 46% 0, 51% 17%, 58% 7%, 64% 23%, 70% 4%, 77% 21%, 82% 9%, 88% 24%, 94% 5%, 100% 17%, 100% 36%, 92% 31%, 86% 44%, 78% 32%, 71% 47%, 65% 34%, 57% 47%, 49% 35%, 43% 49%, 35% 33%, 28% 46%, 21% 31%, 14% 45%, 8% 32%, 0 42%);
+      filter: drop-shadow(2px 3px #4d070d);
+      transform: translate(2px, -2px);
+      -webkit-text-fill-color: transparent;
+      -webkit-text-stroke: 1px #f4e7e0;
+    }
+
+    .menu-actions {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 13px;
+      margin: 0 auto;
+    }
+
+    .menu-actions button {
+      min-width: 260px;
+      padding: 15px 22px;
+      font-size: 16px;
+      letter-spacing: .16em;
     }
 
     #preview {
       box-sizing: border-box;
       width: 100%;
       min-height: 340px;
-      border: 1px solid #c8cfdb;
-      border-radius: 8px;
-      background: #fff;
+      margin-top: 20px;
+      border: 1px solid #542326;
+      background: #0c0909;
     }
 
-    #output {
-      min-height: 240px;
+    dialog {
+      width: min(440px, calc(100% - 40px));
+      padding: 24px;
+      border: 1px solid #813238;
+      color: #e7d9d4;
+      background: linear-gradient(145deg, #211415, #0d090a);
+      box-shadow: 0 20px 80px rgb(0 0 0 / 75%);
+    }
+
+    dialog::backdrop {
+      background: rgb(4 2 3 / 82%);
+    }
+
+    #category-settings {
+      display: grid;
+      gap: 12px;
+    }
+
+    .category-setting {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .category-setting input {
+      width: 80px;
+      padding: 7px;
+      border: 1px solid #684044;
+      color: #f0e7e2;
+      background: #100b0c;
+    }
+
+    .settings-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
       margin-top: 20px;
+    }
+
+    .settings-actions button:first-child {
+      color: #e7d9d4;
+      background: #211719;
+    }
+
+    .question-form {
+      display: grid;
+      gap: 14px;
+    }
+
+    .question-form label {
+      display: grid;
+      gap: 6px;
+      font-weight: 600;
+    }
+
+    .question-form input,
+    .question-form select,
+    .question-form textarea {
+      box-sizing: border-box;
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #684044;
+      color: #f0e7e2;
+      background: #100b0c;
+      font: 15px Georgia, "Times New Roman", serif;
+    }
+
+    .question-form textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    .options-editor {
+      display: grid;
+      gap: 8px;
+    }
+
+    .options-editor h3 {
+      margin: 0;
+    }
+
+    .option-row {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .option-row input[type="radio"],
+    .option-row input[type="checkbox"] {
+      width: auto;
+    }
+
+    .option-row button,
+    #add-option {
+      padding: 7px 10px;
+    }
+
+    #question-error {
+      margin: 0;
+      color: #ff7777;
+    }
+
+    #settings-error,
+    #menu-error {
+      color: #ff7777;
+    }
+
+    #menu-error {
+      margin: 0 0 16px;
+      text-align: center;
+    }
+
+    @media (max-width: 520px) {
+      body {
+        padding: 16px 12px;
+      }
+
+      .menu {
+        min-height: calc(100vh - 32px);
+      }
+
+      .menu-kicker,
+      .menu-tagline {
+        letter-spacing: .32em;
+      }
+
+      .menu-actions,
+      .menu-actions button {
+        width: 100%;
+      }
+
+      .option-row {
+        grid-template-columns: auto minmax(0, 1fr);
+      }
+
+      .option-row button {
+        grid-column: 2;
+        justify-self: end;
+      }
     }
 
   </style>
 </head>
 <body>
-  <h1>Предпросмотр теста</h1>
+  <main id="menu" class="menu">
+    <p class="menu-kicker">Тест · хоррор-издание</p>
+    <h1 id="menu-title"></h1>
+    <div class="menu-actions">
+      <button id="settings-button" type="button">Настройки</button>
+      <button id="create-question-button" type="button">Создать свой вопрос</button>
+      <button id="start-button" type="button">Начать тест</button>
+    </div>
+    <p id="menu-error" role="alert"></p>
+    <p class="menu-tagline">Проверь свои знания</p>
+  </main>
 
-  <section class="panel">
-    <iframe id="preview" title="Предпросмотр сгенерированного теста"></iframe>
+  <section id="test-screen" class="panel" hidden>
+    <button id="back-button" type="button">В меню</button>
+    <iframe id="preview" title="Тест"></iframe>
   </section>
+
+  <dialog id="settings-dialog" aria-labelledby="settings-title">
+    <form id="settings-form">
+      <h2 id="settings-title">Настройки теста</h2>
+      <p>Количество вопросов в каждой категории:</p>
+      <div id="category-settings"></div>
+      <p id="settings-error" role="alert"></p>
+      <div class="settings-actions">
+        <button id="cancel-settings" type="button">Отмена</button>
+        <button type="submit">Сохранить</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="question-dialog" aria-labelledby="question-dialog-title">
+    <form id="question-form" class="question-form">
+      <h2 id="question-dialog-title">Новый вопрос</h2>
+      <label for="question-category">Категория</label>
+      <input id="question-category" name="category" list="question-categories" required>
+      <datalist id="question-categories"></datalist>
+      <label for="question-type">Тип ответа</label>
+      <select id="question-type" name="type">
+        <option value="r">Один правильный ответ</option>
+        <option value="c">Несколько правильных ответов</option>
+        <option value="t">Текстовый ответ</option>
+      </select>
+      <label for="question-text">Текст вопроса</label>
+      <textarea id="question-text" name="text" required></textarea>
+      <section id="options-section" class="options-editor">
+        <h3>Варианты ответа</h3>
+        <p>Отметьте правильный вариант флажком слева.</p>
+        <div id="question-options"></div>
+        <button id="add-option" type="button">Добавить вариант</button>
+      </section>
+      <label id="answer-section" for="question-answer" hidden>
+        Правильный ответ
+        <input id="question-answer" name="answer">
+      </label>
+      <p id="question-error" role="alert"></p>
+      <div class="settings-actions">
+        <button id="cancel-question" type="button">Отмена</button>
+        <button type="submit">Сохранить вопрос</button>
+      </div>
+    </form>
+  </dialog>
 
   <script src="question-bank.js"></script>
   <script>
     "use strict";
 
     const preview = document.querySelector("#preview");
+    const menu = document.querySelector("#menu");
+    const menuError = document.querySelector("#menu-error");
+    const testScreen = document.querySelector("#test-screen");
+    const settingsDialog = document.querySelector("#settings-dialog");
+    const settingsForm = document.querySelector("#settings-form");
+    const categorySettings = document.querySelector("#category-settings");
+    const settingsError = document.querySelector("#settings-error");
+    const questionDialog = document.querySelector("#question-dialog");
+    const questionForm = document.querySelector("#question-form");
+    const questionType = document.querySelector("#question-type");
+    const questionOptions = document.querySelector("#question-options");
+    const questionError = document.querySelector("#question-error");
+    let questionCounts = { ...window.questionBank.questionsPerCategory };
+
+    const folderName = decodeURIComponent(new URL(".", window.location.href).pathname.split("/").filter(Boolean).pop() || "");
+    if (folderName) {
+      window.questionBank.title = folderName;
+      window.questionBank.heading = folderName;
+    }
+    document.title = window.questionBank.title;
+    const menuTitle = document.querySelector("#menu-title");
+    menuTitle.textContent = window.questionBank.heading;
+    menuTitle.dataset.title = window.questionBank.heading;
+    menuTitle.setAttribute("aria-label", window.questionBank.heading);
+
+    const customQuestionsStorageKey = "quiz-custom-questions";
+
+    function readCustomQuestions() {
+      const saved = localStorage.getItem(customQuestionsStorageKey);
+      if (!saved) return [];
+      const questions = JSON.parse(saved);
+      if (!Array.isArray(questions)) {
+        throw new Error("Сохраненные пользовательские вопросы имеют неверный формат.");
+      }
+      return questions;
+    }
+
+    function getEffectiveBank() {
+      const bank = {
+        ...window.questionBank,
+        categories: Object.fromEntries(
+          Object.entries(window.questionBank.categories).map(([category, questions]) => [category, questions.slice()])
+        )
+      };
+      readCustomQuestions().forEach(({ category, question }) => {
+        if (typeof category !== "string" || !category.trim() || !question || typeof question.text !== "string") {
+          throw new Error("В сохраненных пользовательских вопросах найдена некорректная запись.");
+        }
+        if (!bank.categories[category]) bank.categories[category] = [];
+        bank.categories[category].push(question);
+      });
+      return bank;
+    }
+
+    function showSettings() {
+      categorySettings.replaceChildren();
+      settingsError.textContent = "";
+      let bank;
+      try {
+        bank = getEffectiveBank();
+      } catch (error) {
+        if (!(error instanceof Error)) throw error;
+        settingsError.textContent = error.message;
+        settingsDialog.showModal();
+        return;
+      }
+      Object.entries(bank.categories).forEach(([category]) => {
+        const label = document.createElement("label");
+        label.className = "category-setting";
+        const name = document.createElement("span");
+        name.textContent = category;
+        const input = document.createElement("input");
+        input.type = "number";
+        input.name = category;
+        input.min = "0";
+        input.step = "1";
+        input.required = true;
+        input.value = String(questionCounts[category] ?? bank.questionsPerCategory[category] ?? 1);
+        input.setAttribute("aria-label", `Количество вопросов категории ${category}`);
+        label.append(name, input);
+        categorySettings.appendChild(label);
+      });
+      settingsDialog.showModal();
+    }
+
+    document.querySelector("#settings-button").addEventListener("click", showSettings);
+    document.querySelector("#cancel-settings").addEventListener("click", () => settingsDialog.close());
+
+    settingsForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const newCounts = {};
+      let total = 0;
+      for (const input of categorySettings.querySelectorAll("input")) {
+        const count = Number(input.value);
+        if (!Number.isInteger(count) || count < 0) {
+          settingsError.textContent = `Для категории "${input.name}" укажите неотрицательное целое число.`;
+          return;
+        }
+        newCounts[input.name] = count;
+        total += count;
+      }
+      if (total === 0) {
+        settingsError.textContent = "Выберите хотя бы один вопрос.";
+        return;
+      }
+      questionCounts = newCounts;
+      settingsDialog.close();
+    });
+
+    function addOptionRow(text, correct) {
+      const row = document.createElement("div");
+      row.className = "option-row";
+      const correctInput = document.createElement("input");
+      correctInput.type = questionType.value === "r" ? "radio" : "checkbox";
+      correctInput.name = "correct-option";
+      correctInput.checked = correct;
+      correctInput.setAttribute("aria-label", "Правильный вариант");
+      const textInput = document.createElement("input");
+      textInput.type = "text";
+      textInput.required = true;
+      textInput.placeholder = "Текст варианта";
+      textInput.value = text;
+      const removeButton = document.createElement("button");
+      removeButton.type = "button";
+      removeButton.textContent = "Удалить";
+      removeButton.setAttribute("aria-label", "Удалить вариант ответа");
+      removeButton.addEventListener("click", () => row.remove());
+      row.append(correctInput, textInput, removeButton);
+      questionOptions.appendChild(row);
+    }
+
+    function updateQuestionType() {
+      const isTextAnswer = questionType.value === "t";
+      document.querySelector("#options-section").hidden = isTextAnswer;
+      document.querySelector("#answer-section").hidden = !isTextAnswer;
+      questionOptions.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach((input) => {
+        input.type = questionType.value === "r" ? "radio" : "checkbox";
+      });
+    }
+
+    document.querySelector("#create-question-button").addEventListener("click", () => {
+      questionForm.reset();
+      questionOptions.replaceChildren();
+      questionError.textContent = "";
+      const categoryList = document.querySelector("#question-categories");
+      categoryList.replaceChildren();
+      let bank;
+      try {
+        bank = getEffectiveBank();
+      } catch (error) {
+        if (!(error instanceof Error)) throw error;
+        menuError.textContent = error.message;
+        return;
+      }
+      Object.keys(bank.categories).forEach((category) => {
+        const option = document.createElement("option");
+        option.value = category;
+        categoryList.appendChild(option);
+      });
+      questionType.value = "r";
+      addOptionRow("", false);
+      addOptionRow("", false);
+      updateQuestionType();
+      questionDialog.showModal();
+    });
+
+    document.querySelector("#cancel-question").addEventListener("click", () => questionDialog.close());
+    document.querySelector("#add-option").addEventListener("click", () => addOptionRow("", false));
+    questionType.addEventListener("change", updateQuestionType);
+
+    questionForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      questionError.textContent = "";
+      const category = questionForm.elements.namedItem("category").value.trim();
+      const type = questionType.value;
+      const text = questionForm.elements.namedItem("text").value.trim();
+      if (!category || !text) {
+        questionError.textContent = "Укажите категорию и текст вопроса.";
+        return;
+      }
+
+      let question;
+      if (type === "t") {
+        const answer = questionForm.elements.namedItem("answer").value.trim();
+        if (!answer) {
+          questionError.textContent = "Укажите правильный текстовый ответ.";
+          return;
+        }
+        question = { text, type, answer };
+      } else {
+        const rows = Array.from(questionOptions.querySelectorAll(".option-row"));
+        const options = rows.map((row) => ({
+          text: row.querySelector('input[type="text"]').value.trim(),
+          correct: row.querySelector('input[type="radio"], input[type="checkbox"]').checked
+        }));
+        const correctCount = options.filter((option) => option.correct).length;
+        if (options.length < 2 || options.some((option) => !option.text)) {
+          questionError.textContent = "Добавьте не менее двух вариантов и заполните каждый.";
+          return;
+        }
+        if ((type === "r" && correctCount !== 1) || (type === "c" && correctCount < 1)) {
+          questionError.textContent = type === "r"
+            ? "Отметьте ровно один правильный вариант."
+            : "Отметьте хотя бы один правильный вариант.";
+          return;
+        }
+        question = { text, type, options };
+      }
+
+      try {
+        const savedQuestions = readCustomQuestions();
+        savedQuestions.push({ category, question });
+        localStorage.setItem(customQuestionsStorageKey, JSON.stringify(savedQuestions));
+        if (!(category in questionCounts)) questionCounts[category] = 1;
+        questionDialog.close();
+        menuError.textContent = `Вопрос добавлен в категорию «${category}».`;
+      } catch (error) {
+        if (!(error instanceof Error)) throw error;
+        questionError.textContent = `Не удалось сохранить вопрос: ${error.message}`;
+      }
+    });
+
+    document.querySelector("#start-button").addEventListener("click", () => {
+      menuError.textContent = "";
+      try {
+        const quiz = buildRandomizedQuiz(getEffectiveBank(), questionCounts);
+        preview.srcdoc = makeQuizHtml(quiz);
+        menu.hidden = true;
+        testScreen.hidden = false;
+      } catch (error) {
+        if (!(error instanceof Error)) throw error;
+        menuError.textContent = error.message;
+      }
+    });
+
+    document.querySelector("#back-button").addEventListener("click", () => {
+      testScreen.hidden = true;
+      menu.hidden = false;
+    });
 
     function shuffle(items) {
       const shuffled = items.slice();
@@ -101,7 +626,7 @@
       return shuffled;
     }
 
-    function buildRandomizedQuiz(bank) {
+    function buildRandomizedQuiz(bank, counts) {
       if (!bank || !bank.categories || !bank.questionsPerCategory) {
         throw new Error("Банк вопросов должен содержать категории и количество вопросов для каждой категории.");
       }
@@ -111,16 +636,14 @@
       if (categories.length === 0) throw new Error("В банке вопросов нет категорий.");
 
       categories.forEach((category) => {
-        const count = bank.questionsPerCategory[category];
+        const count = counts[category] ?? bank.questionsPerCategory[category] ?? 1;
         const categoryQuestions = bank.categories[category];
         if (!Number.isInteger(count) || count < 0) {
           throw new Error(`Для категории "${category}" задайте неотрицательное целое число вопросов.`);
         }
-        if (!Array.isArray(categoryQuestions) || categoryQuestions.length < count) {
-          throw new Error(`В категории "${category}" недостаточно вопросов для выбранного количества (${count}).`);
-        }
+        if (!Array.isArray(categoryQuestions)) throw new Error(`В категории "${category}" нет списка вопросов.`);
 
-        shuffle(categoryQuestions).slice(0, count).forEach((question) => {
+        shuffle(categoryQuestions).slice(0, Math.min(count, categoryQuestions.length)).forEach((question) => {
           if (!question || typeof question.text !== "string" || !["r", "c", "t"].includes(question.type)) {
             throw new Error(`В категории "${category}" найден вопрос с некорректным текстом или типом.`);
           }
@@ -161,12 +684,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title></title>
   <style>
-    body{max-width:760px;margin:32px auto;padding:0 16px;font:16px/1.5 system-ui,sans-serif;color:#172033}
-    fieldset{margin:16px 0;padding:16px;border:1px solid #c8cfdb;border-radius:8px}
+    body{max-width:760px;min-height:100vh;box-sizing:border-box;margin:0 auto;padding:32px 16px;font:16px/1.5 Georgia,"Times New Roman",serif;color:#e7d9d4;background:radial-gradient(ellipse at 18% 22%,rgb(111 17 20 / 44%),transparent 31%),radial-gradient(ellipse at 82% 68%,rgb(83 14 17 / 48%),transparent 35%),radial-gradient(ellipse at 50% 48%,#211313 0,#100b0b 48%,#080707 100%)}
+    .quiz-title{position:relative;margin:10vh 0 7vh;color:#e5d8d2;font-family:Impact,Haettenschweiler,"Arial Black",fantasy;font-size:clamp(2.2rem,8vw,6.5rem);font-weight:900;letter-spacing:-.09em;line-height:.83;text-transform:uppercase;-webkit-text-stroke:1px #e9dcd5;text-shadow:-2px -1px #827674,0 5px #4e0c11,0 0 22px #a31b22;filter:contrast(1.3);transform:skewX(-4deg) scaleX(.91);overflow-wrap:anywhere}
+    .quiz-title::after{position:absolute;inset:0;overflow:hidden;color:transparent;content:attr(data-title);clip-path:polygon(0 16%,7% 22%,11% 3%,16% 20%,22% 11%,27% 26%,34% 8%,39% 20%,46% 0,51% 17%,58% 7%,64% 23%,70% 4%,77% 21%,82% 9%,88% 24%,94% 5%,100% 17%,100% 36%,92% 31%,86% 44%,78% 32%,71% 47%,65% 34%,57% 47%,49% 35%,43% 49%,35% 33%,28% 46%,21% 31%,14% 45%,8% 32%,0 42%);filter:drop-shadow(2px 3px #4d070d);transform:translate(2px,-2px);-webkit-text-fill-color:transparent;-webkit-text-stroke:1px #f4e7e0}
+    fieldset{margin:16px 0;padding:16px;border:1px solid #542326;background:linear-gradient(145deg,rgb(25 16 16 / 96%),rgb(9 8 8 / 98%));box-shadow:inset 0 0 24px rgb(93 11 19 / 12%)}
     label{display:block;margin:8px 0}
-    input[type=text]{box-sizing:border-box;width:100%;max-width:420px;padding:9px}
-    button{padding:10px 16px;border:0;border-radius:6px;color:#fff;background:#3156c9;font:inherit;cursor:pointer}
-    #result{margin-top:16px;font-weight:700}
+    input[type=text]{box-sizing:border-box;width:100%;max-width:420px;padding:10px;border:1px solid #684044;color:#f0e7e2;background:#100b0c;font:inherit}
+    button{padding:12px 18px;border:1px solid #8e3035;color:#f2e7df;background:linear-gradient(180deg,#58191e,#260e11);font:600 15px Georgia,"Times New Roman",serif;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
+    button:hover{border-color:#d65b60;background:linear-gradient(180deg,#81242a,#3c1015)}
+    #result{margin-top:24px;color:#f1d8d2;font-size:1.25rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
     .quiz--compact fieldset{margin:8px 0;padding:10px}
   </style>
 </head>
@@ -179,7 +705,10 @@
     document.title = quiz.title;
     const root = document.getElementById("quiz");
     const heading = document.createElement("h1");
+    heading.className = "quiz-title";
     heading.textContent = quiz.heading;
+    heading.dataset.title = quiz.heading;
+    heading.setAttribute("aria-label", quiz.heading);
     root.appendChild(heading);
     const form = document.createElement("form");
     quiz.questions.forEach((question, questionIndex) => {
@@ -243,8 +772,6 @@
 </html>`;
     }
 
-    const quiz = buildRandomizedQuiz(window.questionBank);
-    preview.srcdoc = makeQuizHtml(quiz);
   </script>
 </body>
 </html>
