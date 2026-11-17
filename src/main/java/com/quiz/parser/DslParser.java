@@ -1,10 +1,11 @@
 package com.quiz.parser;
 
+import com.quiz.model.AnswerType;
+import com.quiz.model.Option;
 import com.quiz.model.Question;
 import com.quiz.model.Quiz;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -20,14 +21,21 @@ public final class DslParser {
     private static final String HEADING = "H1";
     private static final String STYLE = "Style";
 
+    private static final String QUESTION_PREFIX = "?";
+    private static final String OPTION_PREFIX = "-";
+    private static final String BLOCK_END = "e";
+
     private static final int SNIPPET_LIMIT = 40;
 
     public ParseResult parse(String source) {
         List<ParseError> errors = new ArrayList<>();
+        List<Question> questions = new ArrayList<>();
 
         String title = "";
         String heading = "";
         String style = Quiz.DEFAULT_STYLE;
+
+        QuestionBuilder current = null;
 
         for (Line line : splitLines(source)) {
             String text = line.text();
@@ -68,12 +76,152 @@ public final class DslParser {
                 continue;
             }
 
-            errors.add(new ParseError(line.number(), ErrorCode.UNKNOWN_DIRECTIVE,
-                    "не удалось разобрать строку: " + snippet(text)));
+            if (text.startsWith(QUESTION_PREFIX)) {
+                if (current != null) {
+                    errors.add(notClosed(current));
+                }
+                current = startQuestion(line.number(), text, errors);
+                continue;
+            }
+
+            if (text.equals(BLOCK_END)) {
+                if (current == null) {
+                    errors.add(unknownLine(line.number(), text));
+                } else {
+                    closeBlock(current, questions, errors);
+                    current = null;
+                }
+                continue;
+            }
+
+            if (text.startsWith(OPTION_PREFIX)) {
+                if (current == null) {
+                    errors.add(new ParseError(line.number(), ErrorCode.OPTION_OUTSIDE_OPTIONS,
+                            "вариант ответа вне блока вариантов"));
+                } else if (parseOption(line.number(), text, current, errors)) {
+                    closeBlock(current, questions, errors);
+                    current = null;
+                }
+                continue;
+            }
+
+            errors.add(unknownLine(line.number(), text));
         }
 
-        Quiz quiz = new Quiz(title, heading, style, Collections.<Question>emptyList());
+        if (current != null) {
+            errors.add(notClosed(current));
+        }
+
+        Quiz quiz = new Quiz(title, heading, style, questions);
         return new ParseResult(quiz, errors);
+    }
+
+    private static QuestionBuilder startQuestion(int lineNumber, String text, List<ParseError> errors) {
+        String body = text.substring(QUESTION_PREFIX.length()).trim();
+        if (body.isEmpty()) {
+            errors.add(new ParseError(lineNumber, ErrorCode.EMPTY_QUESTION, "после ? нет текста вопроса"));
+            return null;
+        }
+
+        int space = body.lastIndexOf(' ');
+        if (space <= 0) {
+            errors.add(new ParseError(lineNumber, ErrorCode.EMPTY_QUESTION, "после ? нет текста вопроса"));
+            return null;
+        }
+
+        String code = body.substring(space + 1);
+        AnswerType type;
+        try {
+            type = AnswerType.fromCode(code);
+        } catch (IllegalArgumentException e) {
+            errors.add(new ParseError(lineNumber, ErrorCode.EXPECTED_ANSWER_TYPE,
+                    "неизвестный тип ответа: " + code));
+            return null;
+        }
+
+        if (type == AnswerType.TEXT) {
+            errors.add(new ParseError(lineNumber, ErrorCode.EXPECTED_ANSWER_TYPE,
+                    "тип t пока не поддерживается"));
+            return null;
+        }
+
+        return new QuestionBuilder(lineNumber, body.substring(0, space).trim(), type);
+    }
+
+    /**
+     * Разбирает строку варианта ответа и сообщает, закрывает ли она блок.
+     */
+    private static boolean parseOption(int lineNumber, String text, QuestionBuilder builder, List<ParseError> errors) {
+        String body = text.substring(OPTION_PREFIX.length()).trim();
+        boolean closed = false;
+        boolean correct = false;
+
+        if (body.equals(BLOCK_END)) {
+            closed = true;
+            body = "";
+        } else if (body.endsWith(" " + BLOCK_END)) {
+            closed = true;
+            body = body.substring(0, body.length() - 2).trim();
+        } else if (body.endsWith("+" + BLOCK_END)) {
+            closed = true;
+            correct = true;
+            body = body.substring(0, body.length() - 2).trim();
+        }
+
+        if (body.endsWith(" +")) {
+            correct = true;
+            body = body.substring(0, body.length() - 2).trim();
+        } else if (body.equals("+")) {
+            correct = true;
+            body = "";
+        }
+
+        if (body.isEmpty()) {
+            if (!closed) {
+                errors.add(new ParseError(lineNumber, ErrorCode.EMPTY_OPTION, "пустой вариант ответа"));
+            }
+            return closed;
+        }
+
+        builder.options.add(new Option(body, correct));
+        return closed;
+    }
+
+    private static void closeBlock(QuestionBuilder builder, List<Question> questions, List<ParseError> errors) {
+        if (builder.options.isEmpty()) {
+            errors.add(new ParseError(builder.line, ErrorCode.NO_OPTIONS, "у вопроса нет вариантов ответа"));
+            return;
+        }
+
+        int correctCount = 0;
+        for (Option option : builder.options) {
+            if (option.correct()) {
+                correctCount++;
+            }
+        }
+
+        if (correctCount == 0) {
+            errors.add(new ParseError(builder.line, ErrorCode.NO_CORRECT_OPTION,
+                    "у вопроса нет правильного варианта"));
+            return;
+        }
+
+        if (builder.type == AnswerType.SINGLE && correctCount > 1) {
+            errors.add(new ParseError(builder.line, ErrorCode.TOO_MANY_CORRECT_OPTIONS,
+                    "у вопроса с одним ответом " + correctCount + " правильных варианта"));
+            return;
+        }
+
+        questions.add(new Question(builder.text, builder.type, builder.options, null));
+    }
+
+    private static ParseError notClosed(QuestionBuilder builder) {
+        return new ParseError(builder.line, ErrorCode.BLOCK_NOT_CLOSED, "блок вариантов не закрыт маркером e");
+    }
+
+    private static ParseError unknownLine(int lineNumber, String text) {
+        return new ParseError(lineNumber, ErrorCode.UNKNOWN_DIRECTIVE,
+                "не удалось разобрать строку: " + snippet(text));
     }
 
     /**
@@ -131,6 +279,21 @@ public final class DslParser {
 
         String text() {
             return text;
+        }
+    }
+
+    /** Накопитель данных о ещё не закрытом вопросе. */
+    private static final class QuestionBuilder {
+
+        private final int line;
+        private final String text;
+        private final AnswerType type;
+        private final List<Option> options = new ArrayList<>();
+
+        private QuestionBuilder(int line, String text, AnswerType type) {
+            this.line = line;
+            this.text = text;
+            this.type = type;
         }
     }
 }

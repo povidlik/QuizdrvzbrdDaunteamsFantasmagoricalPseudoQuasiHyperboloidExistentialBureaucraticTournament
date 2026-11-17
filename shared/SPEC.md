@@ -88,6 +88,8 @@ _ My answer
 | `EMPTY_QUESTION` | после `?` нет текста вопроса |
 | `EXPECTED_ANSWER_TYPE` | после вопроса нет типа `r`/`c`/`t` |
 | `OPTION_OUTSIDE_OPTIONS` | строка `-` вне блока вариантов |
+| `EMPTY_OPTION` | вариант `-` без текста |
+| `NO_OPTIONS` | блок закрыт, но вариантов не было |
 | `NO_CORRECT_OPTION` | у вопроса `r`/`c` нет ни одного `+` |
 | `TOO_MANY_CORRECT_OPTIONS` | у вопроса `r` больше одного `+` |
 | `MISSING_TEXT_ANSWER` | у вопроса `t` нет строки `_` |
