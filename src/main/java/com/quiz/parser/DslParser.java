@@ -23,6 +23,7 @@ public final class DslParser {
 
     private static final String QUESTION_PREFIX = "?";
     private static final String OPTION_PREFIX = "-";
+    private static final String ANSWER_PREFIX = "_";
     private static final String BLOCK_END = "e";
 
     private static final int SNIPPET_LIMIT = 40;
@@ -78,9 +79,28 @@ public final class DslParser {
 
             if (text.startsWith(QUESTION_PREFIX)) {
                 if (current != null) {
-                    errors.add(notClosed(current));
+                    errors.add(unanswered(current));
                 }
                 current = startQuestion(line.number(), text, errors);
+                continue;
+            }
+
+            if (current != null && current.type == AnswerType.TEXT) {
+                if (text.startsWith(ANSWER_PREFIX)) {
+                    String answer = text.substring(ANSWER_PREFIX.length()).trim();
+                    if (answer.isEmpty()) {
+                        errors.add(new ParseError(line.number(), ErrorCode.MISSING_TEXT_ANSWER,
+                                "после _ нет эталонного ответа"));
+                    } else {
+                        questions.add(Question.textAnswer(current.text, answer));
+                    }
+                    current = null;
+                } else if (text.startsWith(OPTION_PREFIX)) {
+                    errors.add(new ParseError(line.number(), ErrorCode.OPTION_OUTSIDE_OPTIONS,
+                            "вариант ответа вне вопроса с выбором"));
+                } else {
+                    errors.add(unknownLine(line.number(), text));
+                }
                 continue;
             }
 
@@ -105,11 +125,17 @@ public final class DslParser {
                 continue;
             }
 
+            if (text.startsWith(ANSWER_PREFIX)) {
+                errors.add(new ParseError(line.number(), ErrorCode.ANSWER_OUTSIDE_QUESTION,
+                        "строка _ вне вопроса типа t"));
+                continue;
+            }
+
             errors.add(unknownLine(line.number(), text));
         }
 
         if (current != null) {
-            errors.add(notClosed(current));
+            errors.add(unanswered(current));
         }
 
         Quiz quiz = new Quiz(title, heading, style, questions);
@@ -136,12 +162,6 @@ public final class DslParser {
         } catch (IllegalArgumentException e) {
             errors.add(new ParseError(lineNumber, ErrorCode.EXPECTED_ANSWER_TYPE,
                     "неизвестный тип ответа: " + code));
-            return null;
-        }
-
-        if (type == AnswerType.TEXT) {
-            errors.add(new ParseError(lineNumber, ErrorCode.EXPECTED_ANSWER_TYPE,
-                    "тип t пока не поддерживается"));
             return null;
         }
 
@@ -215,7 +235,11 @@ public final class DslParser {
         questions.add(new Question(builder.text, builder.type, builder.options, null));
     }
 
-    private static ParseError notClosed(QuestionBuilder builder) {
+    private static ParseError unanswered(QuestionBuilder builder) {
+        if (builder.type == AnswerType.TEXT) {
+            return new ParseError(builder.line, ErrorCode.MISSING_TEXT_ANSWER,
+                    "у вопроса типа t нет строки с ответом _");
+        }
         return new ParseError(builder.line, ErrorCode.BLOCK_NOT_CLOSED, "блок вариантов не закрыт маркером e");
     }
 

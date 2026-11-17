@@ -10,6 +10,7 @@ public enum ErrorCode {
     EMPTY_QUESTION("пустой текст вопроса"),
     EXPECTED_ANSWER_TYPE("не указан тип ответа r/c/t"),
     OPTION_OUTSIDE_OPTIONS("вариант ответа вне блока вариантов"),
+    ANSWER_OUTSIDE_QUESTION("ответ вне вопроса с текстовым вводом"),
     EMPTY_OPTION("пустой вариант ответа"),
     NO_OPTIONS("у вопроса нет вариантов ответа"),
     NO_CORRECT_OPTION("нет правильного варианта"),
