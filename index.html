@@ -86,137 +86,70 @@
     <iframe id="preview" title="Предпросмотр сгенерированного теста"></iframe>
   </section>
 
+  <script src="question-bank.js"></script>
   <script>
     "use strict";
 
-    const sample = `Title Демонстрационный тест
-H1 Основы веб-разработки
-Style default
-
-? Какой язык используется для разметки веб-страниц? r
-- JavaScript
-+ HTML
-- CSS
-e
-
-? Какие из перечисленных значений являются типами ответа в этом DSL? c
-+ Одиночный выбор
-+ Множественный выбор
-- Случайный выбор
-e
-
-? Как называется таблица стилей веб-страницы? t
-_ CSS`;
-
     const preview = document.querySelector("#preview");
 
-    function parseQuiz(source) {
-      const quiz = { title: "Тест", heading: "Тест", style: "default", questions: [] };
-      const lines = source.split(/\r?\n/);
-      let question = null;
-      let blockEnded = true;
-      const errors = [];
+    function shuffle(items) {
+      const shuffled = items.slice();
+      for (let index = shuffled.length - 1; index > 0; index--) {
+        const swapIndex = Math.floor(Math.random() * (index + 1));
+        [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+      }
+      return shuffled;
+    }
 
-      function finishQuestion(lineNumber) {
-        if (!question) return;
-        if (question.type === "t") {
-          if (!question.answer) {
-            errors.push(`Строка ${lineNumber}: для текстового вопроса нужен ответ в формате "_ ответ".`);
-          }
-        } else {
-          if (!blockEnded) {
-            errors.push(`Строка ${lineNumber}: блок вариантов вопроса "${question.text}" должен завершаться строкой e.`);
-          }
-          const correctCount = question.options.filter((option) => option.correct).length;
-          if (question.type === "r" && correctCount !== 1) {
-            errors.push(`Строка ${question.line}: у вопроса с типом r должен быть ровно один правильный вариант.`);
-          }
-          if (question.type === "c" && correctCount < 1) {
-            errors.push(`Строка ${question.line}: у вопроса с типом c должен быть хотя бы один правильный вариант.`);
-          }
-          if (question.options.length === 0) {
-            errors.push(`Строка ${question.line}: добавьте варианты ответа.`);
-          }
-        }
-        quiz.questions.push(question);
-        question = null;
+    function buildRandomizedQuiz(bank) {
+      if (!bank || !bank.categories || !bank.questionsPerCategory) {
+        throw new Error("Банк вопросов должен содержать категории и количество вопросов для каждой категории.");
       }
 
-      lines.forEach((rawLine, index) => {
-        const lineNumber = index + 1;
-        const line = rawLine.trim();
-        if (!line) return;
+      const questions = [];
+      const categories = Object.keys(bank.categories);
+      if (categories.length === 0) throw new Error("В банке вопросов нет категорий.");
 
-        const questionMatch = line.match(/^\?\s+(.+?)\s+([rct])$/i);
-        if (questionMatch) {
-          finishQuestion(lineNumber);
-          question = {
-            text: questionMatch[1].trim(),
-            type: questionMatch[2].toLowerCase(),
-            options: [],
-            answer: "",
-            line: lineNumber
-          };
-          blockEnded = question.type === "t";
-          return;
+      categories.forEach((category) => {
+        const count = bank.questionsPerCategory[category];
+        const categoryQuestions = bank.categories[category];
+        if (!Number.isInteger(count) || count < 0) {
+          throw new Error(`Для категории "${category}" задайте неотрицательное целое число вопросов.`);
+        }
+        if (!Array.isArray(categoryQuestions) || categoryQuestions.length < count) {
+          throw new Error(`В категории "${category}" недостаточно вопросов для выбранного количества (${count}).`);
         }
 
-        if (!question) {
-          const metadataMatch = line.match(/^(Title|H1|Style)\s+(.+)$/i);
-          if (!metadataMatch) {
-            errors.push(`Строка ${lineNumber}: ожидалась директива Title, H1, Style или начало вопроса "?".`);
-            return;
+        shuffle(categoryQuestions).slice(0, count).forEach((question) => {
+          if (!question || typeof question.text !== "string" || !["r", "c", "t"].includes(question.type)) {
+            throw new Error(`В категории "${category}" найден вопрос с некорректным текстом или типом.`);
           }
-          const value = metadataMatch[2].trim();
-          if (!value) {
-            errors.push(`Строка ${lineNumber}: значение директивы ${metadataMatch[1]} не должно быть пустым.`);
-            return;
-          }
-          const key = metadataMatch[1].toLowerCase();
-          if (key === "title") quiz.title = value;
-          if (key === "h1") quiz.heading = value;
-          if (key === "style") {
-            if (!/^[a-zA-Z0-9_-]+$/.test(value)) {
-              errors.push(`Строка ${lineNumber}: Style должен содержать только латинские буквы, цифры, "_" или "-".`);
-            } else {
-              quiz.style = value;
+          if (question.type === "t") {
+            if (typeof question.answer !== "string" || !question.answer.trim()) {
+              throw new Error(`Вопрос "${question.text}" должен содержать текстовый ответ.`);
             }
+            questions.push({ ...question, category });
+            return;
           }
-          return;
-        }
 
-        if (question.type === "t") {
-          const answerMatch = line.match(/^_\s*(.+)$/);
-          if (!answerMatch) {
-            errors.push(`Строка ${lineNumber}: для текстового ответа используйте формат "_ ответ".`);
-          } else if (question.answer) {
-            errors.push(`Строка ${lineNumber}: для текстового вопроса укажите только один правильный ответ.`);
-          } else {
-            question.answer = answerMatch[1].trim();
+          if (!Array.isArray(question.options) || question.options.length === 0) {
+            throw new Error(`Вопрос "${question.text}" должен содержать варианты ответа.`);
           }
-          return;
-        }
-
-        if (/^e$/i.test(line)) {
-          if (blockEnded) {
-            errors.push(`Строка ${lineNumber}: лишняя строка e — блок вариантов уже завершен.`);
+          const correctCount = question.options.filter((option) => option.correct === true).length;
+          if ((question.type === "r" && correctCount !== 1) || (question.type === "c" && correctCount < 1)) {
+            throw new Error(`Проверьте количество правильных ответов в вопросе "${question.text}".`);
           }
-          blockEnded = true;
-          return;
-        }
-
-        const optionMatch = line.match(/^([+-])\s+(.+)$/);
-        if (optionMatch && !blockEnded) {
-          question.options.push({ text: optionMatch[2].trim(), correct: optionMatch[1] === "+" });
-          return;
-        }
-
-        errors.push(`Строка ${lineNumber}: ожидался вариант ответа ("- текст" или "+ текст")${blockEnded ? " до строки e" : ""}.`);
+          questions.push({ ...question, options: shuffle(question.options), category });
+        });
       });
 
-      finishQuestion(lines.length + 1);
-      if (quiz.questions.length === 0) errors.push("Добавьте хотя бы один вопрос.");
-      return { quiz, errors };
+      if (questions.length === 0) throw new Error("Выберите хотя бы один вопрос для теста.");
+      return {
+        title: bank.title,
+        heading: bank.heading,
+        style: bank.style,
+        questions
+      };
     }
 
     function makeQuizHtml(quiz) {
@@ -310,8 +243,7 @@ _ CSS`;
 </html>`;
     }
 
-    const { quiz, errors } = parseQuiz(sample);
-    if (errors.length) throw new Error(errors.join("\n"));
+    const quiz = buildRandomizedQuiz(window.questionBank);
     preview.srcdoc = makeQuizHtml(quiz);
   </script>
 </body>
