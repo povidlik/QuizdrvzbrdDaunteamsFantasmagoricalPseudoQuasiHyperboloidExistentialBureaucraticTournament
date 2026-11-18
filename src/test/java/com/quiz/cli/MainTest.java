@@ -58,6 +58,22 @@ class MainTest {
     }
 
     @Test
+    @DisplayName("Тест без вопросов — ошибка, файл не создаётся")
+    void reportsEmptyQuiz() throws Exception {
+        Path dsl = dir.resolve("empty.dsl");
+        Path html = dir.resolve("empty.html");
+        Files.write(dsl, "Title T\nH1 H\n".getBytes(StandardCharsets.UTF_8));
+
+        ByteArrayOutputStream err = new ByteArrayOutputStream();
+        int code = Main.run(new String[]{dsl.toString(), html.toString()},
+                stream(new ByteArrayOutputStream()), stream(err));
+
+        assertEquals(Main.INVALID_DSL, code);
+        assertFalse(Files.exists(html));
+        assertTrue(err.toString("UTF-8").contains("нет ни одного вопроса"));
+    }
+
+    @Test
     @DisplayName("Без аргументов печатает подсказку и возвращает код 1")
     void reportsUsage() throws Exception {
         ByteArrayOutputStream err = new ByteArrayOutputStream();

@@ -59,6 +59,11 @@ public final class Main {
             return INVALID_DSL;
         }
 
+        if (result.quiz().isEmpty()) {
+            err.println("В тесте нет ни одного вопроса");
+            return INVALID_DSL;
+        }
+
         String html = new HtmlGenerator().generate(result.quiz());
         try {
             Files.write(output, html.getBytes(StandardCharsets.UTF_8));
