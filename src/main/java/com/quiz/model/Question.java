@@ -10,7 +10,8 @@ import java.util.stream.Collectors;
  * Один вопрос теста.
  *
  * <p>Для вопросов с выбором заполняется {@link #options()}, для текстового —
- * {@link #answer()}.
+ * {@link #answer()}. {@link #category()} используется для группировки вопросов
+ * в банке.
  */
 public final class Question {
 
@@ -18,14 +19,20 @@ public final class Question {
     private final AnswerType type;
     private final List<Option> options;
     private final String answer;
+    private final String category;
+
+    public Question(String text, AnswerType type, List<Option> options, String answer) {
+        this(text, type, options, answer, "");
+    }
 
     /**
-     * @param text    текст вопроса
-     * @param type    тип ответа
-     * @param options варианты ответа (пустой список для {@link AnswerType#TEXT})
-     * @param answer  эталонный ответ (только для {@link AnswerType#TEXT}, иначе {@code null})
+     * @param text     текст вопроса
+     * @param type     тип ответа
+     * @param options  варианты ответа (пустой список для {@link AnswerType#TEXT})
+     * @param answer   эталонный ответ (только для {@link AnswerType#TEXT}, иначе {@code null})
+     * @param category категория вопроса (директива {@code Category})
      */
-    public Question(String text, AnswerType type, List<Option> options, String answer) {
+    public Question(String text, AnswerType type, List<Option> options, String answer, String category) {
         this.text = Objects.requireNonNull(text, "text");
         this.type = Objects.requireNonNull(type, "type");
         this.options = options == null
@@ -35,18 +42,31 @@ public final class Question {
             throw new IllegalArgumentException("Ответ в виде текста допустим только для типа " + AnswerType.TEXT.code());
         }
         this.answer = answer;
+        this.category = category == null ? "" : category;
     }
 
     public static Question singleChoice(String text, List<Option> options) {
-        return new Question(text, AnswerType.SINGLE, options, null);
+        return singleChoice(text, options, "");
+    }
+
+    public static Question singleChoice(String text, List<Option> options, String category) {
+        return new Question(text, AnswerType.SINGLE, options, null, category);
     }
 
     public static Question multipleChoice(String text, List<Option> options) {
-        return new Question(text, AnswerType.MULTIPLE, options, null);
+        return multipleChoice(text, options, "");
+    }
+
+    public static Question multipleChoice(String text, List<Option> options, String category) {
+        return new Question(text, AnswerType.MULTIPLE, options, null, category);
     }
 
     public static Question textAnswer(String text, String answer) {
-        return new Question(text, AnswerType.TEXT, Collections.<Option>emptyList(), answer);
+        return textAnswer(text, answer, "");
+    }
+
+    public static Question textAnswer(String text, String answer, String category) {
+        return new Question(text, AnswerType.TEXT, Collections.<Option>emptyList(), answer, category);
     }
 
     public String text() {
@@ -63,6 +83,10 @@ public final class Question {
 
     public String answer() {
         return answer;
+    }
+
+    public String category() {
+        return category;
     }
 
     public boolean hasOptions() {
@@ -87,17 +111,18 @@ public final class Question {
         return text.equals(other.text)
                 && type == other.type
                 && options.equals(other.options)
-                && Objects.equals(answer, other.answer);
+                && Objects.equals(answer, other.answer)
+                && category.equals(other.category);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(text, type, options, answer);
+        return Objects.hash(text, type, options, answer, category);
     }
 
     @Override
     public String toString() {
-        return "Question{text='" + text + "', type=" + type
-                + ", options=" + options + ", answer='" + answer + "'}";
+        return "Question{text='" + text + "', type=" + type + ", category='" + category
+                + "', options=" + options + ", answer='" + answer + "'}";
     }
 }

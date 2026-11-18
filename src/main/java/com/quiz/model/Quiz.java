@@ -2,7 +2,9 @@ package com.quiz.model;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -11,6 +13,9 @@ import java.util.Objects;
 public final class Quiz {
 
     public static final String DEFAULT_STYLE = "default";
+
+    /** Категория для вопросов, у которых директива {@code Category} не задана. */
+    public static final String DEFAULT_CATEGORY = "Общие";
 
     private final String title;
     private final String heading;
@@ -47,6 +52,27 @@ public final class Quiz {
 
     public List<Question> questions() {
         return questions;
+    }
+
+    /**
+     * Вопросы, разложенные по категориям в порядке первого появления.
+     * Вопросы без категории попадают в {@link #DEFAULT_CATEGORY}.
+     */
+    public Map<String, List<Question>> categories() {
+        Map<String, List<Question>> grouped = new LinkedHashMap<>();
+        for (Question question : questions) {
+            String category = question.category().isEmpty() ? DEFAULT_CATEGORY : question.category();
+            List<Question> bucket = grouped.get(category);
+            if (bucket == null) {
+                bucket = new ArrayList<>();
+                grouped.put(category, bucket);
+            }
+            bucket.add(question);
+        }
+        for (Map.Entry<String, List<Question>> entry : grouped.entrySet()) {
+            entry.setValue(Collections.unmodifiableList(entry.getValue()));
+        }
+        return Collections.unmodifiableMap(grouped);
     }
 
     public boolean isEmpty() {

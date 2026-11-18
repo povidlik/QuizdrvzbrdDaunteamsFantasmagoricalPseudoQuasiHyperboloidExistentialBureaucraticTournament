@@ -20,6 +20,7 @@ public final class DslParser {
     private static final String TITLE = "Title";
     private static final String HEADING = "H1";
     private static final String STYLE = "Style";
+    private static final String CATEGORY = "Category";
 
     private static final String QUESTION_PREFIX = "?";
     private static final String OPTION_PREFIX = "-";
@@ -35,6 +36,7 @@ public final class DslParser {
         String title = "";
         String heading = "";
         String style = Quiz.DEFAULT_STYLE;
+        String category = "";
 
         QuestionBuilder current = null;
 
@@ -77,11 +79,22 @@ public final class DslParser {
                 continue;
             }
 
+            value = directiveValue(text, CATEGORY);
+            if (value != null) {
+                if (value.isEmpty()) {
+                    errors.add(new ParseError(line.number(), ErrorCode.EMPTY_DIRECTIVE_VALUE,
+                            "у директивы Category нет значения"));
+                } else {
+                    category = value;
+                }
+                continue;
+            }
+
             if (text.startsWith(QUESTION_PREFIX)) {
                 if (current != null) {
                     errors.add(unanswered(current));
                 }
-                current = startQuestion(line.number(), text, errors);
+                current = startQuestion(line.number(), text, category, errors);
                 continue;
             }
 
@@ -92,7 +105,7 @@ public final class DslParser {
                         errors.add(new ParseError(line.number(), ErrorCode.MISSING_TEXT_ANSWER,
                                 "после _ нет эталонного ответа"));
                     } else {
-                        questions.add(Question.textAnswer(current.text, answer));
+                        questions.add(Question.textAnswer(current.text, answer, current.category));
                     }
                     current = null;
                 } else if (text.startsWith(OPTION_PREFIX)) {
@@ -142,7 +155,7 @@ public final class DslParser {
         return new ParseResult(quiz, errors);
     }
 
-    private static QuestionBuilder startQuestion(int lineNumber, String text, List<ParseError> errors) {
+    private static QuestionBuilder startQuestion(int lineNumber, String text, String category, List<ParseError> errors) {
         String body = text.substring(QUESTION_PREFIX.length()).trim();
         if (body.isEmpty()) {
             errors.add(new ParseError(lineNumber, ErrorCode.EMPTY_QUESTION, "после ? нет текста вопроса"));
@@ -165,7 +178,7 @@ public final class DslParser {
             return null;
         }
 
-        return new QuestionBuilder(lineNumber, body.substring(0, space).trim(), type);
+        return new QuestionBuilder(lineNumber, body.substring(0, space).trim(), type, category);
     }
 
     /**
@@ -232,7 +245,7 @@ public final class DslParser {
             return;
         }
 
-        questions.add(new Question(builder.text, builder.type, builder.options, null));
+        questions.add(new Question(builder.text, builder.type, builder.options, null, builder.category));
     }
 
     private static ParseError unanswered(QuestionBuilder builder) {
@@ -312,12 +325,14 @@ public final class DslParser {
         private final int line;
         private final String text;
         private final AnswerType type;
+        private final String category;
         private final List<Option> options = new ArrayList<>();
 
-        private QuestionBuilder(int line, String text, AnswerType type) {
+        private QuestionBuilder(int line, String text, AnswerType type, String category) {
             this.line = line;
             this.text = text;
             this.type = type;
+            this.category = category;
         }
     }
 }
