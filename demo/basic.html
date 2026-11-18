@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My title</title>
+<style>
+  body { margin: 0; padding: 32px 16px; background: #f4f4f5; color: #18181b; font-family: 'Segoe UI', Arial, sans-serif; }
+  .quiz { max-width: 720px; margin: 0 auto; background: #fff; padding: 24px 28px; border-radius: 12px; box-shadow: 0 2px 12px rgba(0, 0, 0, .08); }
+  .quiz-title { margin-top: 0; font-size: 26px; }
+  .question { border-left: 3px solid #d4d4d8; padding: 8px 0 8px 14px; margin: 18px 0; }
+  .question.correct { border-left-color: #16a34a; }
+  .question.wrong { border-left-color: #dc2626; }
+  .question-text { font-weight: 600; margin: 0 0 10px; }
+  .option { display: block; padding: 6px 0; cursor: pointer; }
+  .option input { margin-right: 8px; }
+  .answer { width: 100%; box-sizing: border-box; padding: 8px 10px; border: 1px solid #d4d4d8; border-radius: 6px; font-size: 15px; }
+  .check { margin-top: 8px; padding: 10px 18px; border: 0; border-radius: 6px; background: #18181b; color: #fff; font-size: 15px; cursor: pointer; }
+  .check:hover { background: #3f3f46; }
+  .result { margin-top: 16px; font-size: 18px; font-weight: 600; }
+</style>
+</head>
+<body class="test-style-default">
+<main class="quiz">
+<h1 class="quiz-title">Super Test</h1>
+<form id="quiz-form" novalidate>
+<section class="question" data-type="r">
+<p class="question-text">1. 2+2=</p>
+<label class="option" for="q1_0"><input type="radio" id="q1_0" name="q1" value="0"><span>4</span></label>
+<label class="option" for="q1_1"><input type="radio" id="q1_1" name="q1" value="1"><span>5</span></label>
+<label class="option" for="q1_2"><input type="radio" id="q1_2" name="q1" value="2"><span>6</span></label>
+</section>
+<section class="question" data-type="c">
+<p class="question-text">2. Second question</p>
+<label class="option" for="q2_0"><input type="checkbox" id="q2_0" name="q2" value="0"><span>A</span></label>
+<label class="option" for="q2_1"><input type="checkbox" id="q2_1" name="q2" value="1"><span>B</span></label>
+<label class="option" for="q2_2"><input type="checkbox" id="q2_2" name="q2" value="2"><span>C</span></label>
+</section>
+<section class="question" data-type="t">
+<p class="question-text">3. Text question</p>
+<input type="text" class="answer" name="q3" autocomplete="off">
+</section>
+<button type="submit" class="check">Проверить ответы</button>
+</form>
+<p id="result" class="result" role="status"></p>
+</main>
+<script>
+(function () {
+  var KEY = [
+    {type:"r", correct:[0]},
+    {type:"c", correct:[1,2]},
+    {type:"t", answer:"My answer"}
+  ];
+  var form = document.getElementById('quiz-form');
+  var result = document.getElementById('result');
+  var questions = form.querySelectorAll('.question');
+  form.addEventListener('submit', function (event) {
+    event.preventDefault();
+    var score = 0;
+    for (var i = 0; i < questions.length; i++) {
+      var key = KEY[i];
+      var ok = checkAnswer(questions[i], key);
+      questions[i].className = 'question ' + (ok ? 'correct' : 'wrong');
+      if (ok) { score++; }
+    }
+    result.textContent = 'Результат: ' + score + ' из ' + questions.length;
+  });
+  function checkAnswer(question, key) {
+    if (key.type === 't') {
+      var input = question.querySelector('input.answer');
+      return input.value.trim().toLowerCase() === key.answer.trim().toLowerCase();
+    }
+    var inputs = question.querySelectorAll('input');
+    var checked = [];
+    for (var j = 0; j < inputs.length; j++) {
+      if (inputs[j].checked) { checked.push(Number(inputs[j].value)); }
+    }
+    if (checked.length !== key.correct.length) { return false; }
+    for (var k = 0; k < checked.length; k++) {
+      if (key.correct.indexOf(checked[k]) === -1) { return false; }
+    }
+    return true;
+  }
+})();
+</script>
+</body>
+</html>
