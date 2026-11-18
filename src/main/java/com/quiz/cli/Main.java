@@ -1,5 +1,6 @@
 package com.quiz.cli;
 
+import com.quiz.export.BankExporter;
 import com.quiz.generator.HtmlGenerator;
 import com.quiz.parser.DslParser;
 import com.quiz.parser.ParseError;
@@ -15,16 +16,22 @@ import java.nio.file.Paths;
 /**
  * Точка входа: читает DSL-файл и сохраняет готовую HTML-форму теста.
  *
- * <pre>java -jar quiz-dsl.jar test.dsl test.html</pre>
+ * <pre>
+ * java -jar quiz-dsl.jar test.dsl test.html
+ * java -jar quiz-dsl.jar --bank test.dsl question-bank.js
+ * </pre>
  *
- * <p>Коды возврата: 0 — успех, 1 — неверные аргументы или ошибки ввода-вывода,
- * 2 — в DSL есть ошибки.
+ * <p>Первый режим собирает автономную форму, второй — банк вопросов для страницы
+ * викторины. Коды возврата: 0 — успех, 1 — неверные аргументы или ошибки
+ * ввода-вывода, 2 — в DSL есть ошибки.
  */
 public final class Main {
 
     static final int OK = 0;
     static final int USAGE_ERROR = 1;
     static final int INVALID_DSL = 2;
+
+    static final String BANK_FLAG = "--bank";
 
     private Main() {
     }
@@ -34,13 +41,15 @@ public final class Main {
     }
 
     static int run(String[] args, PrintStream out, PrintStream err) {
-        if (args.length != 2) {
-            err.println("Использование: java -jar quiz-dsl.jar <входной.dsl> <выходной.html>");
+        boolean bank = args.length > 0 && BANK_FLAG.equals(args[0]);
+        int expected = bank ? 3 : 2;
+        if (args.length != expected) {
+            printUsage(err);
             return USAGE_ERROR;
         }
 
-        Path input = Paths.get(args[0]);
-        Path output = Paths.get(args[1]);
+        Path input = Paths.get(args[bank ? 1 : 0]);
+        Path output = Paths.get(args[bank ? 2 : 1]);
 
         String source;
         try {
@@ -64,15 +73,23 @@ public final class Main {
             return INVALID_DSL;
         }
 
-        String html = new HtmlGenerator().generate(result.quiz());
+        String content = bank
+                ? new BankExporter().generate(result.quiz())
+                : new HtmlGenerator().generate(result.quiz());
         try {
-            Files.write(output, html.getBytes(StandardCharsets.UTF_8));
+            Files.write(output, content.getBytes(StandardCharsets.UTF_8));
         } catch (IOException e) {
             err.println("Не удалось записать " + output + ": " + e.getMessage());
             return USAGE_ERROR;
         }
 
-        out.println("Готово: " + output + " (" + result.quiz().size() + " вопросов)");
+        out.println((bank ? "Банк: " : "Готово: ") + output + " (" + result.quiz().size() + " вопросов)");
         return OK;
+    }
+
+    private static void printUsage(PrintStream err) {
+        err.println("Использование:");
+        err.println("  java -jar quiz-dsl.jar <входной.dsl> <выходной.html>");
+        err.println("  java -jar quiz-dsl.jar " + BANK_FLAG + " <входной.dsl> <question-bank.js>");
     }
 }

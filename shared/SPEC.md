@@ -124,6 +124,16 @@ _ My answer
 | `Question.answer` | `questions[].answer` | только для `t` |
 | `Question.category` | `categories.<имя>[]` | из `Category`, по умолчанию `Общие` |
 
+Выгрузка в этот формат:
+
+```
+java -jar quiz-dsl.jar --bank shared/content/web.dsl question-bank.js
+```
+
+Экспорт ставит `questionsPerCategory` = 1 для каждой категории: страница викторины
+по умолчанию берёт по одному вопросу из каждой. Без `Category` все вопросы попадают
+в группу `Общие`.
+
 ## 8. Пример из задания
 
 ```

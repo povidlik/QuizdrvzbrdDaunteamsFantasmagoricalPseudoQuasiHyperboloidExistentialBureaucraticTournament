@@ -41,6 +41,26 @@ class MainTest {
     }
 
     @Test
+    @DisplayName("С флагом --bank сохраняет банк вопросов для страницы викторины")
+    void convertsDslToQuestionBank() throws Exception {
+        Path dsl = dir.resolve("bank.dsl");
+        Path bank = dir.resolve("question-bank.js");
+        Files.write(dsl, "Title T\nH1 H\nCategory HTML\n? Q r\n- a +e\n".getBytes(StandardCharsets.UTF_8));
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        int code = Main.run(new String[]{Main.BANK_FLAG, dsl.toString(), bank.toString()},
+                stream(out), stream(new ByteArrayOutputStream()));
+
+        assertEquals(Main.OK, code);
+        assertTrue(Files.exists(bank));
+
+        String generated = new String(Files.readAllBytes(bank), StandardCharsets.UTF_8);
+        assertTrue(generated.startsWith("window.questionBank = {"));
+        assertTrue(generated.contains("\"HTML\""));
+        assertTrue(out.toString("UTF-8").contains("Банк:"));
+    }
+
+    @Test
     @DisplayName("При ошибках DSL возвращает код 2 и печатает номера строк")
     void reportsDslErrors() throws Exception {
         Path dsl = dir.resolve("broken.dsl");
