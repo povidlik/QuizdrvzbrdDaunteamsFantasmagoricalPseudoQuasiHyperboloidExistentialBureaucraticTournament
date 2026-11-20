@@ -391,12 +391,10 @@
     const questionError = document.querySelector("#question-error");
     let questionCounts = { ...window.questionBank.questionsPerCategory };
 
-    const folderName = decodeURIComponent(new URL(".", window.location.href).pathname.split("/").filter(Boolean).pop() || "");
-    if (folderName) {
-      window.questionBank.title = folderName;
-      window.questionBank.heading = folderName;
-    }
-    document.title = window.questionBank.title;
+    const testName = "QuizdrvzbrdDaunteamsFantasmagoricalPseudoQuasiHyperboloidExistentialBureaucraticTournament";
+    window.questionBank.title = testName;
+    window.questionBank.heading = testName;
+    document.title = testName;
     const menuTitle = document.querySelector("#menu-title");
     menuTitle.textContent = window.questionBank.heading;
     menuTitle.dataset.title = window.questionBank.heading;
