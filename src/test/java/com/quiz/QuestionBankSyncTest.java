@@ -30,8 +30,10 @@ class QuestionBankSyncTest {
         ParseResult result = new DslParser().parse(read(content));
 
         assertTrue(result.isSuccess(), () -> content + "\n" + result.errorReport());
-        assertEquals(9, result.quiz().size());
-        assertEquals(3, result.quiz().categories().size());
+        assertEquals(126, result.quiz().size());
+        assertEquals(42, result.quiz().categories().size());
+        assertTrue(result.quiz().categories().values().stream()
+                .allMatch(categoryQuestions -> categoryQuestions.size() == 3));
     }
 
     @Test

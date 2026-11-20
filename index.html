@@ -177,24 +177,183 @@
       background: rgb(4 2 3 / 82%);
     }
 
-    #category-settings {
+    #settings-dialog {
+      width: min(820px, calc(100% - 32px));
+      max-height: calc(100vh - 40px);
+      overflow-y: auto;
+    }
+
+    .category-browser-label {
+      display: block;
+      margin-bottom: 8px;
+      color: #d7c6bf;
+    }
+
+    .category-toolbar {
       display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
       gap: 12px;
+      align-items: end;
+      margin-bottom: 12px;
+    }
+
+    #category-search {
+      box-sizing: border-box;
+      width: 100%;
+      min-height: 42px;
+      padding: 9px 12px;
+      border: 1px solid #684044;
+      color: #f0e7e2;
+      background: #100b0c;
+      font: inherit;
+    }
+
+    .category-selection-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .category-selection-actions button {
+      min-height: 42px;
+      padding: 8px 12px;
+      font-size: 12px;
+      letter-spacing: .04em;
+    }
+
+    .category-groups {
+      display: grid;
+      gap: 10px;
+    }
+
+    .category-group {
+      overflow: hidden;
+      border: 1px solid #542326;
+      background: linear-gradient(145deg, rgb(25 16 16 / 96%), rgb(9 8 8 / 98%));
+    }
+
+    .category-group-header {
+      display: flex;
+      align-items: stretch;
+      gap: 10px;
+      padding: 8px;
+      background: rgb(78 12 17 / 25%);
+    }
+
+    .category-group-toggle {
+      display: flex;
+      flex: 1 1 auto;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+      padding: 9px 12px;
+      border-color: transparent;
+      background: transparent;
+      letter-spacing: .04em;
+      text-align: left;
+    }
+
+    .category-group-toggle::before {
+      color: #d65b60;
+      content: "+";
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    .category-group-toggle[aria-expanded="true"]::before {
+      content: "-";
+    }
+
+    .category-group-count {
+      flex: 0 0 auto;
+      align-self: center;
+      color: #b6a19a;
+      font-size: 12px;
+    }
+
+    .topic-choice {
+      display: flex;
+      flex: 0 0 auto;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border: 1px solid #684044;
+      color: #d7c6bf;
+      background: #160e0f;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .topic-choice input[type="checkbox"],
+    .subcategory-choice input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      margin: 0;
+      accent-color: #b53640;
+    }
+
+    .category-items {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+      gap: 10px;
+      padding: 10px;
+    }
+
+    .category-items[hidden] {
+      display: none;
     }
 
     .category-setting {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 16px;
+      flex-direction: column;
+      gap: 14px;
+      padding: 14px;
+      border: 1px solid #542326;
+      background: linear-gradient(145deg, rgb(25 16 16 / 96%), rgb(9 8 8 / 98%));
     }
 
-    .category-setting input {
-      width: 80px;
-      padding: 7px;
+    .subcategory-choice {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      line-height: 1.4;
+      cursor: pointer;
+    }
+
+    .category-count {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      color: #b6a19a;
+      font-size: 13px;
+    }
+
+    .category-count input[type="number"] {
+      box-sizing: border-box;
+      width: 100px;
+      padding: 8px;
       border: 1px solid #684044;
       color: #f0e7e2;
       background: #100b0c;
+      font: inherit;
+    }
+
+    .category-count input:disabled {
+      opacity: .45;
+    }
+
+    .category-selection {
+      margin: 12px 0;
+      color: #b6a19a;
+      font-size: 13px;
+    }
+
+    .menu-selection {
+      margin: 10px 0 0;
+      color: #b6a19a;
+      font-size: 13px;
+      text-align: center;
     }
 
     .settings-actions {
@@ -283,6 +442,31 @@
         padding: 16px 12px;
       }
 
+      .category-toolbar {
+        grid-template-columns: 1fr;
+      }
+
+      .category-selection-actions {
+        width: 100%;
+      }
+
+      .category-selection-actions button {
+        flex: 1 1 auto;
+      }
+
+      .category-group-header {
+        flex-wrap: wrap;
+      }
+
+      .category-group-toggle {
+        flex-basis: calc(100% - 110px);
+      }
+
+      .topic-choice {
+        flex: 1 1 auto;
+        justify-content: center;
+      }
+
       .menu {
         min-height: calc(100vh - 32px);
       }
@@ -314,10 +498,11 @@
     <p class="menu-kicker">Тест · хоррор-издание</p>
     <h1 id="menu-title"></h1>
     <div class="menu-actions">
+      <button id="start-button" type="button">Начать тест</button>
       <button id="settings-button" type="button">Настройки</button>
       <button id="create-question-button" type="button">Создать свой вопрос</button>
-      <button id="start-button" type="button">Начать тест</button>
     </div>
+    <p id="menu-selection" class="menu-selection" aria-live="polite"></p>
     <p id="menu-error" role="alert"></p>
     <p class="menu-tagline">Проверь свои знания</p>
   </main>
@@ -330,8 +515,19 @@
   <dialog id="settings-dialog" aria-labelledby="settings-title">
     <form id="settings-form">
       <h2 id="settings-title">Настройки теста</h2>
-      <p>Количество вопросов в каждой категории:</p>
-      <div id="category-settings"></div>
+      <p>Выберите несколько категорий из разных тем или найдите их по названию.</p>
+      <section class="category-browser" aria-label="Выбор категорий теста">
+        <label class="category-browser-label" for="category-search">Поиск категорий</label>
+        <div class="category-toolbar">
+          <input id="category-search" type="search" placeholder="Например: география, CSS, история">
+          <div class="category-selection-actions">
+            <button id="select-all-categories" type="button">Выбрать всё</button>
+            <button id="clear-categories" type="button">Снять всё</button>
+          </div>
+        </div>
+        <p id="category-selection" class="category-selection" aria-live="polite"></p>
+        <div id="category-groups" class="category-groups"></div>
+      </section>
       <p id="settings-error" role="alert"></p>
       <div class="settings-actions">
         <button id="cancel-settings" type="button">Отмена</button>
@@ -382,14 +578,23 @@
     const testScreen = document.querySelector("#test-screen");
     const settingsDialog = document.querySelector("#settings-dialog");
     const settingsForm = document.querySelector("#settings-form");
-    const categorySettings = document.querySelector("#category-settings");
     const settingsError = document.querySelector("#settings-error");
     const questionDialog = document.querySelector("#question-dialog");
     const questionForm = document.querySelector("#question-form");
     const questionType = document.querySelector("#question-type");
     const questionOptions = document.querySelector("#question-options");
     const questionError = document.querySelector("#question-error");
+    const menuSelection = document.querySelector("#menu-selection");
+    const categorySearch = document.querySelector("#category-search");
+    const selectAllCategories = document.querySelector("#select-all-categories");
+    const clearCategories = document.querySelector("#clear-categories");
+    const categoryGroupsContainer = document.querySelector("#category-groups");
+    const categorySelection = document.querySelector("#category-selection");
     let questionCounts = { ...window.questionBank.questionsPerCategory };
+    let selectedCategories = null;
+    let settingsSelectedCategories = [];
+    let expandedTopics = {};
+    let settingsDraftCounts = null;
 
     const testName = "QuizdrvzbrdDaunteamsFantasmagoricalPseudoQuasiHyperboloidExistentialBureaucraticTournament";
     window.questionBank.title = testName;
@@ -429,8 +634,197 @@
       return bank;
     }
 
+    function getCategoryGroups(bank) {
+      const groups = new Map();
+      Object.keys(bank.categories).forEach((category) => {
+        const separator = category.indexOf(" / ");
+        const topic = separator === -1 ? category : category.slice(0, separator);
+        const subcategory = separator === -1 ? null : category.slice(separator + 3);
+        if (!groups.has(topic)) groups.set(topic, []);
+        groups.get(topic).push({ category, subcategory });
+      });
+      return groups;
+    }
+
+    function getScopedCategories(bank, selected) {
+      const categories = Object.keys(bank.categories);
+      if (selected === null) return categories;
+      const selectedSet = new Set(selected);
+      return categories.filter((category) => selectedSet.has(category));
+    }
+
+    function getVisibleCategoryGroups(bank, query) {
+      const normalizedQuery = query.trim().toLocaleLowerCase();
+      return Array.from(getCategoryGroups(bank).entries()).map(([topic, categories]) => {
+        const topicMatches = topic.toLocaleLowerCase().includes(normalizedQuery);
+        const matches = topicMatches
+          ? categories
+          : categories.filter(({ category, subcategory }) =>
+            `${category} ${subcategory || ""}`.toLocaleLowerCase().includes(normalizedQuery));
+        return { topic, categories, matches };
+      }).filter(({ matches }) => matches.length > 0);
+    }
+
+    function updateMenuSelection() {
+      try {
+        const bank = getEffectiveBank();
+        const allCategories = Object.keys(bank.categories);
+        const categories = getScopedCategories(bank, selectedCategories);
+        const questionTotal = categories.reduce((total, category) => {
+          const configured = questionCounts[category] ?? bank.questionsPerCategory[category] ?? 1;
+          return total + Math.min(configured, bank.categories[category].length);
+        }, 0);
+        const scope = categories.length === allCategories.length
+          ? "все темы"
+          : categories.length === 1
+            ? `категория «${categories[0]}»`
+            : `${categories.length} ${categories.length < 5 ? "категории" : "категорий"}`;
+        menuSelection.textContent = `Выбран тест: ${scope}. Вопросов: ${questionTotal}.`;
+      } catch (error) {
+        if (!(error instanceof Error)) throw error;
+        menuError.textContent = error.message;
+      }
+    }
+
+    function rememberSettingsDraftCounts() {
+      if (!settingsDraftCounts) return;
+      categoryGroupsContainer.querySelectorAll('input[type="number"]').forEach((input) => {
+        settingsDraftCounts[input.name] = input.value;
+      });
+    }
+
+    function renderCategoryBrowser() {
+      categoryGroupsContainer.replaceChildren();
+      let bank;
+      try {
+        bank = getEffectiveBank();
+      } catch (error) {
+        if (!(error instanceof Error)) throw error;
+        settingsError.textContent = error.message;
+        return;
+      }
+
+      const allCategories = Object.keys(bank.categories);
+      const query = categorySearch.value.trim();
+      const visibleGroups = getVisibleCategoryGroups(bank, query);
+      const selected = new Set(settingsSelectedCategories);
+      selectAllCategories.textContent = query ? "Выбрать найденное" : "Выбрать всё";
+      clearCategories.textContent = query ? "Снять найденное" : "Снять всё";
+      categorySelection.textContent = `Выбрано категорий: ${selected.size} из ${allCategories.length}.`;
+
+      if (visibleGroups.length === 0) {
+        const empty = document.createElement("p");
+        empty.className = "category-selection";
+        empty.textContent = "Категории по запросу не найдены.";
+        categoryGroupsContainer.appendChild(empty);
+        return;
+      }
+
+      visibleGroups.forEach(({ topic, categories, matches }, index) => {
+        const group = document.createElement("section");
+        group.className = "category-group";
+        const header = document.createElement("div");
+        header.className = "category-group-header";
+        const toggle = document.createElement("button");
+        toggle.type = "button";
+        toggle.className = "category-group-toggle";
+        toggle.textContent = topic;
+        const itemsId = `category-items-${index}`;
+        toggle.setAttribute("aria-controls", itemsId);
+        const items = document.createElement("div");
+        items.id = itemsId;
+        items.className = "category-items";
+        const expanded = Boolean(query) || expandedTopics[topic] === true;
+        toggle.setAttribute("aria-expanded", String(expanded));
+        items.hidden = !expanded;
+        toggle.addEventListener("click", () => {
+          const nextExpanded = toggle.getAttribute("aria-expanded") !== "true";
+          toggle.setAttribute("aria-expanded", String(nextExpanded));
+          items.hidden = !nextExpanded;
+          expandedTopics[topic] = nextExpanded;
+        });
+
+        const selectedCount = categories.filter(({ category }) => selected.has(category)).length;
+        const topicChoice = document.createElement("label");
+        topicChoice.className = "topic-choice";
+        const topicCheckbox = document.createElement("input");
+        topicCheckbox.type = "checkbox";
+        topicCheckbox.checked = selectedCount === categories.length;
+        topicCheckbox.indeterminate = selectedCount > 0 && selectedCount < categories.length;
+        topicCheckbox.setAttribute("aria-label", `Выбрать все категории темы ${topic}`);
+        const topicText = document.createElement("span");
+        topicText.textContent = "Вся тема";
+        topicChoice.append(topicCheckbox, topicText);
+        const topicCount = document.createElement("span");
+        topicCount.className = "category-group-count";
+        topicCount.textContent = `${selectedCount}/${categories.length}`;
+        topicCheckbox.addEventListener("change", () => {
+          rememberSettingsDraftCounts();
+          const selectedSet = new Set(settingsSelectedCategories);
+          categories.forEach(({ category }) => {
+            if (topicCheckbox.checked) selectedSet.add(category);
+            else selectedSet.delete(category);
+          });
+          settingsSelectedCategories = allCategories.filter((category) => selectedSet.has(category));
+          renderCategoryBrowser();
+        });
+        header.append(toggle, topicCount, topicChoice);
+        group.appendChild(header);
+
+        matches.forEach(({ category, subcategory }) => {
+          const isSelected = selected.has(category);
+          const card = document.createElement("div");
+          card.className = "category-setting";
+          const choice = document.createElement("label");
+          choice.className = "subcategory-choice";
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.checked = isSelected;
+          checkbox.setAttribute("aria-label", `Выбрать категорию ${category}`);
+          const name = document.createElement("span");
+          name.textContent = subcategory || category;
+          choice.append(checkbox, name);
+          checkbox.addEventListener("change", () => {
+            rememberSettingsDraftCounts();
+            const selectedSet = new Set(settingsSelectedCategories);
+            if (checkbox.checked) selectedSet.add(category);
+            else selectedSet.delete(category);
+            settingsSelectedCategories = allCategories.filter((item) => selectedSet.has(item));
+            renderCategoryBrowser();
+          });
+
+          const countLabel = document.createElement("label");
+          countLabel.className = "category-count";
+          const countName = document.createElement("span");
+          countName.textContent = "Вопросов в тесте";
+          const input = document.createElement("input");
+          input.type = "number";
+          input.name = category;
+          input.min = "0";
+          input.step = "1";
+          input.required = isSelected;
+          input.disabled = !isSelected;
+          const draftCount = settingsDraftCounts[category]
+            ?? questionCounts[category]
+            ?? bank.questionsPerCategory[category]
+            ?? 1;
+          settingsDraftCounts[category] = String(draftCount);
+          input.value = String(draftCount);
+          input.setAttribute("aria-label", `Количество вопросов категории ${category}`);
+          input.addEventListener("input", () => {
+            settingsDraftCounts[category] = input.value;
+          });
+          countLabel.append(countName, input);
+          card.append(choice, countLabel);
+          items.appendChild(card);
+        });
+
+        group.appendChild(items);
+        categoryGroupsContainer.appendChild(group);
+      });
+    }
+
     function showSettings() {
-      categorySettings.replaceChildren();
       settingsError.textContent = "";
       let bank;
       try {
@@ -441,48 +835,87 @@
         settingsDialog.showModal();
         return;
       }
-      Object.entries(bank.categories).forEach(([category]) => {
-        const label = document.createElement("label");
-        label.className = "category-setting";
-        const name = document.createElement("span");
-        name.textContent = category;
-        const input = document.createElement("input");
-        input.type = "number";
-        input.name = category;
-        input.min = "0";
-        input.step = "1";
-        input.required = true;
-        input.value = String(questionCounts[category] ?? bank.questionsPerCategory[category] ?? 1);
-        input.setAttribute("aria-label", `Количество вопросов категории ${category}`);
-        label.append(name, input);
-        categorySettings.appendChild(label);
-      });
+      const categories = Object.keys(bank.categories);
+      settingsSelectedCategories = selectedCategories === null
+        ? categories.slice()
+        : categories.filter((category) => selectedCategories.includes(category));
+      settingsDraftCounts = { ...questionCounts };
+      expandedTopics = {};
+      categorySearch.value = "";
+      renderCategoryBrowser();
       settingsDialog.showModal();
     }
+
+    categorySearch.addEventListener("input", () => {
+      rememberSettingsDraftCounts();
+      renderCategoryBrowser();
+    });
+
+    function updateVisibleCategorySelection(select) {
+      rememberSettingsDraftCounts();
+      let bank;
+      try {
+        bank = getEffectiveBank();
+      } catch (error) {
+        if (!(error instanceof Error)) throw error;
+        settingsError.textContent = error.message;
+        return;
+      }
+      const matchingCategories = getVisibleCategoryGroups(bank, categorySearch.value)
+        .flatMap(({ matches }) => matches.map(({ category }) => category));
+      const selectedSet = new Set(settingsSelectedCategories);
+      matchingCategories.forEach((category) => {
+        if (select) selectedSet.add(category);
+        else selectedSet.delete(category);
+      });
+      settingsSelectedCategories = Object.keys(bank.categories).filter((category) => selectedSet.has(category));
+      renderCategoryBrowser();
+    }
+
+    selectAllCategories.addEventListener("click", () => updateVisibleCategorySelection(true));
+    clearCategories.addEventListener("click", () => updateVisibleCategorySelection(false));
 
     document.querySelector("#settings-button").addEventListener("click", showSettings);
     document.querySelector("#cancel-settings").addEventListener("click", () => settingsDialog.close());
 
     settingsForm.addEventListener("submit", (event) => {
       event.preventDefault();
-      const newCounts = {};
-      let total = 0;
-      for (const input of categorySettings.querySelectorAll("input")) {
-        const count = Number(input.value);
+      rememberSettingsDraftCounts();
+      const newCounts = { ...questionCounts };
+      const selectedSet = new Set(settingsSelectedCategories);
+      for (const [category, value] of Object.entries(settingsDraftCounts)) {
+        if (!selectedSet.has(category)) continue;
+        const count = Number(value);
         if (!Number.isInteger(count) || count < 0) {
-          settingsError.textContent = `Для категории "${input.name}" укажите неотрицательное целое число.`;
+          settingsError.textContent = `Для категории "${category}" укажите неотрицательное целое число.`;
           return;
         }
-        newCounts[input.name] = count;
-        total += count;
+        newCounts[category] = count;
       }
+      let bank;
+      try {
+        bank = getEffectiveBank();
+      } catch (error) {
+        if (!(error instanceof Error)) throw error;
+        settingsError.textContent = error.message;
+        return;
+      }
+      const scopeCategories = getScopedCategories(bank, settingsSelectedCategories);
+      const total = scopeCategories.reduce((sum, category) => {
+        return sum + Math.min(newCounts[category], bank.categories[category].length);
+      }, 0);
       if (total === 0) {
-        settingsError.textContent = "Выберите хотя бы один вопрос.";
+        settingsError.textContent = "Выберите хотя бы одну категорию и один вопрос.";
         return;
       }
       questionCounts = newCounts;
+      selectedCategories = settingsSelectedCategories.slice();
+      settingsDraftCounts = null;
+      updateMenuSelection();
       settingsDialog.close();
     });
+
+    updateMenuSelection();
 
     function addOptionRow(text, correct) {
       const row = document.createElement("div");
@@ -589,6 +1022,7 @@
         savedQuestions.push({ category, question });
         localStorage.setItem(customQuestionsStorageKey, JSON.stringify(savedQuestions));
         if (!(category in questionCounts)) questionCounts[category] = 1;
+        updateMenuSelection();
         questionDialog.close();
         menuError.textContent = `Вопрос добавлен в категорию «${category}».`;
       } catch (error) {
@@ -600,7 +1034,9 @@
     document.querySelector("#start-button").addEventListener("click", () => {
       menuError.textContent = "";
       try {
-        const quiz = buildRandomizedQuiz(getEffectiveBank(), questionCounts);
+        const bank = getEffectiveBank();
+        const availableCategories = getScopedCategories(bank, selectedCategories);
+        const quiz = buildRandomizedQuiz(bank, questionCounts, availableCategories);
         preview.srcdoc = makeQuizHtml(quiz);
         menu.hidden = true;
         testScreen.hidden = false;
@@ -624,13 +1060,13 @@
       return shuffled;
     }
 
-    function buildRandomizedQuiz(bank, counts) {
+    function buildRandomizedQuiz(bank, counts, selectedCategories) {
       if (!bank || !bank.categories || !bank.questionsPerCategory) {
         throw new Error("Банк вопросов должен содержать категории и количество вопросов для каждой категории.");
       }
 
       const questions = [];
-      const categories = Object.keys(bank.categories);
+      const categories = selectedCategories || Object.keys(bank.categories);
       if (categories.length === 0) throw new Error("В банке вопросов нет категорий.");
 
       categories.forEach((category) => {

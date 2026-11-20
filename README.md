@@ -61,7 +61,7 @@ java -jar target/quiz-dsl-0.1.0-SNAPSHOT.jar --bank shared/content/web.dsl quest
 ```
 
 ```
-Банк: question-bank.js (9 вопросов)
+Банк: question-bank.js (126 вопросов)
 ```
 
 ### Exit codes
@@ -164,10 +164,18 @@ shared/content/web.dsl  ──►  --bank  ──►  question-bank.js  ──�
 Open `index.html` in a browser (or serve the folder with
 `python -m http.server`), then:
 
-- **Настройки** sets how many questions to take from each category;
+- **Начать тест** starts a quiz using the currently selected categories;
+- **Настройки** searches categories, groups them by topic, supports selecting
+  categories from multiple topics, and sets a separate question count for each;
 - **Создать свой вопрос** adds a custom question, stored in the browser's
   `localStorage`;
-- **Начать тест** builds a randomized quiz.
+- Use **Выбрать всё / Снять всё** or the matching-result actions to change
+  selections quickly.
+
+Nested categories use the format `Тема / Подкатегория` in the DSL. The web
+settings group these names by topic and let you select a whole topic or
+individual subcategories. The displayed title is fixed in the web application
+and does not depend on the directory name.
 
 Do not edit `question-bank.js` by hand: change the questions in
 `shared/content/web.dsl` and regenerate the bank. The test
