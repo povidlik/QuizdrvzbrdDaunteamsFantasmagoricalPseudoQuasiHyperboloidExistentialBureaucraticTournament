@@ -165,6 +165,9 @@ Open `index.html` in a browser (or serve the folder with
 `python -m http.server`), then:
 
 - **Начать тест** starts a quiz using the currently selected categories;
+- **Проверить ответы** shows the correct and incorrect totals, highlights each
+  question, and lists your answer alongside the correct answer for every
+  mistake; unanswered questions count as incorrect;
 - **Настройки** searches categories, groups them by topic, supports selecting
   categories from multiple topics, and sets a separate question count for each;
 - **Создать свой вопрос** adds a custom question, stored in the browser's
