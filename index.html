@@ -958,6 +958,9 @@
       questionOptions.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach((input) => {
         input.type = questionType.value === "r" ? "radio" : "checkbox";
       });
+      questionOptions.querySelectorAll("input").forEach((input) => {
+        input.disabled = isTextAnswer;
+      });
     }
 
     document.querySelector("#create-question-button").addEventListener("click", () => {
