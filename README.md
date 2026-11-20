@@ -224,6 +224,11 @@ The suite covers metadata directives, categories, all three question types,
 option markers, every error code, HTML escaping and scoring, the bank format,
 the CLI exit codes, and the DSL/bank synchronization.
 
+## AI usage
+
+A summary of the OpenCode prompts, decisions and resulting changes is available
+in [`docs/PROMPTS.md`](docs/PROMPTS.md).
+
 ## Limitations
 
 - No nested questions or blocks.
